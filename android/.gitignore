@@ -7,6 +7,7 @@ gradle-wrapper.jar
 /gradle.properties
 /app/google-services.json
 /app/src/main/AndroidManifest.xml
+/app/src/main/res/values/strings.xml
 GeneratedPluginRegistrant.java
 
 # Remember to never publicly share your keystore.

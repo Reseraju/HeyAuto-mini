@@ -41,12 +41,19 @@ dependencies:
   shared_preferences: ^2.1.1
   dio: ^5.1.2
   flutter_polyline_points: ^1.0.0
-  google_maps_flutter: ^2.2.6
   location: ^4.4.0
   permission_handler: ^10.2.0
   permission_handler_android: ^10.2.1
   phone_call: ^0.0.1
   geolocator: ^9.0.2
+  flutter_map: ^1.1.1
+  url_launcher: ^6.1.11
+  latlng: ^1.0.0
+  latlong2: ^0.8.1
+  flutter_svg: ^2.0.5
+  geocoding: ^2.1.0
+  flutter_dotenv: ^5.0.2
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:

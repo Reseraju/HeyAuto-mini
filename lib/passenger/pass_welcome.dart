@@ -138,8 +138,6 @@ class _PassWelcomeState extends State<PassWelcome> {
     );
   }
 
-
-
   Future<void> requestPermissions(BuildContext context) async {
     final permissions = [
       Permission.location,
@@ -215,11 +213,4 @@ class _PassWelcomeState extends State<PassWelcome> {
       }
     }
   }
-
-  
 }
-
-
-
-
-

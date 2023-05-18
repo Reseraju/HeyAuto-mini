@@ -12,8 +12,9 @@ class ChooseRole extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Choose Role'),
+        title: const Text('HeyAuto'),
         backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
