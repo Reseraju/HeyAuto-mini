@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:newheyauto/passenger/pass_home.dart';
+import 'package:newheyauto/passenger/gmap/gmap.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../styles.dart';
 import 'package:geolocator/geolocator.dart';
@@ -150,7 +150,7 @@ class _PassWelcomeState extends State<PassWelcome> {
         status[Permission.phone]!.isGranted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const PassHome()),
+        MaterialPageRoute(builder: (context) => const GMap()),
       );
     } else {
       final isLocationGranted = status[Permission.location]!.isGranted;

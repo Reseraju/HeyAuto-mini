@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:newheyauto/driver/drvr_home.dart';
 import 'package:newheyauto/passenger/Pass_welcome.dart';
-import 'package:newheyauto/passenger/pass_home.dart';
 import '../styles.dart';
 
 class ChooseRole extends StatelessWidget {
