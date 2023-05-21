@@ -1,11 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:newheyauto/authentication/phone_verification/phone.dart';
-import 'package:newheyauto/choose_role.dart';
+import 'package:newheyauto/driver/drvr_home.dart';
+import 'package:newheyauto/passenger/pass_welcome.dart';
 import 'package:pinput/pinput.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyVerify extends StatefulWidget {
-  const MyVerify({Key? key}) : super(key: key);
+  final int selectedRoleIndex;
+  const MyVerify({Key? key, required this.selectedRoleIndex}) : super(key: key);
 
   @override
   State<MyVerify> createState() => _MyVerifyState();
@@ -90,15 +93,67 @@ class _MyVerifyState extends State<MyVerify> {
               ),
               Pinput(
                 length: 6,
-                // defaultPinTheme: defaultPinTheme,
-                // focusedPinTheme: focusedPinTheme,
-                // submittedPinTheme: submittedPinTheme,
-
                 onChanged: (value) {
                   code = value;
                 },
                 showCursor: true,
-                onCompleted: (pin) => print(pin),
+                onCompleted: (pin) async {
+                  try {
+                    PhoneAuthCredential credential =
+                        PhoneAuthProvider.credential(
+                      verificationId: MyPhone.verify,
+                      smsCode: code,
+                    );
+
+                    // Sign in (or link) the user with the credential
+                    await auth.signInWithCredential(credential);
+
+                    // Determine the role based on user selection
+                    int roleIndex = widget
+                        .selectedRoleIndex; // Get the role index based on user selection;
+                    switch (roleIndex) {
+                      case 0:
+                        // Store phone number in Passenger collection
+                        final user = FirebaseAuth.instance.currentUser;
+                        final phoneNumber = user?.phoneNumber;
+                        final passengers = FirebaseFirestore.instance.collection('Passengers');
+                        await passengers.doc(user?.uid).set({
+                          'phone_number': phoneNumber,
+                        });
+
+                        // Navigate to passenger home page
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PassWelcome()),
+                          (route) => false,
+                        );
+                        break;
+                      case 1:
+                        // Store phone number in Driver collection
+                        final user = FirebaseAuth.instance.currentUser;
+                        final phoneNumber = user?.phoneNumber;
+                        final drivers =
+                            FirebaseFirestore.instance.collection('Drivers');
+                        await drivers.doc(user?.uid).set({
+                          'phone_number': phoneNumber,
+                        });
+                        // Navigate to driver home page
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DrvrHome()),
+                          (route) => false,
+                        );
+                        break;
+                      // Add more cases for other roles
+
+                      default:
+                        break;
+                    }
+                  } catch (e) {
+                    print("Verification failed: $e");
+                  }
+                },
               ),
               const SizedBox(
                 height: 20,
@@ -107,47 +162,35 @@ class _MyVerifyState extends State<MyVerify> {
                 width: double.infinity,
                 height: 45,
                 child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        disabledBackgroundColor: Colors.green.shade600,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                    onPressed: () async {
-                      try {
-                        PhoneAuthCredential credential =
-                            PhoneAuthProvider.credential(
-                                verificationId: MyPhone.verify, smsCode: code);
-
-                        // Sign the user in (or link) with the credential
-                        await auth.signInWithCredential(credential);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => ChooseRole()),
-                          (route) => false,
-                        );
-                      } catch (e) {
-                        print("wrong otp");
-                      }
-                    },
-                    child: const Text("Verify Phone Number")),
+                  style: ElevatedButton.styleFrom(
+                    disabledBackgroundColor: Colors.green.shade600,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () {
+                    // Verification completed button (optional)
+                  },
+                  child: const Text("Verify Phone Number"),
+                ),
               ),
               Row(
                 children: [
                   TextButton(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MyPhone(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                      child: const Text(
-                        "Edit Phone Number ?",
-                        style: TextStyle(color: Colors.black),
-                      ))
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>  MyPhone(selectedRoleIndex: widget.selectedRoleIndex,)),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      "Edit Phone Number?",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),

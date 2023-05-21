@@ -57,6 +57,7 @@ dependencies:
   json_annotation: ^4.8.1
   build_runner: ^2.3.3
   google_maps_webservice: ^0.0.19
+  cloud_firestore: ^4.7.1
   
   
   

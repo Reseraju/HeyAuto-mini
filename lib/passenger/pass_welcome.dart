@@ -5,7 +5,7 @@ import '../styles.dart';
 import 'package:geolocator/geolocator.dart';
 
 class PassWelcome extends StatefulWidget {
-  const PassWelcome({super.key});
+  const PassWelcome({Key? key}) : super(key: key);
 
   @override
   State<PassWelcome> createState() => _PassWelcomeState();
@@ -56,7 +56,7 @@ class _PassWelcomeState extends State<PassWelcome> {
                       TextSpan(text: "\n"),
                       TextSpan(
                         text:
-                            "Have a hustle-free booking experience by giving us the following permissions.\n",
+                            "Have a hassle-free booking experience by giving us the following permissions.\n",
                         style: TextStyle(
                             color: Color.fromARGB(255, 55, 51, 51),
                             fontWeight: FontWeight.normal),

@@ -4,10 +4,12 @@ import 'package:newheyauto/authentication/phone_verification/verify.dart';
 import 'package:pinput/pinput.dart';
 
 class MyPhone extends StatefulWidget {
-  const MyPhone({Key? key}) : super(key: key);
+  final int selectedRoleIndex;
+  const MyPhone({Key? key, required this.selectedRoleIndex}) : super(key: key);
 
   static String verify = "";
 
+  
   @override
   State<MyPhone> createState() => _MyPhoneState();
 }
@@ -15,6 +17,7 @@ class MyPhone extends StatefulWidget {
 class _MyPhoneState extends State<MyPhone> {
   TextEditingController countryController = TextEditingController();
   var phone = "";
+  
 
   @override
   void initState() {
@@ -122,7 +125,7 @@ class _MyPhoneState extends State<MyPhone> {
                         codeSent: (String verificationId, int? resendToken) {
                           MyPhone.verify = verificationId;
                           Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => const MyVerify()));
+                            MaterialPageRoute(builder: (context) =>   MyVerify(selectedRoleIndex: widget.selectedRoleIndex)));
                         },
                         codeAutoRetrievalTimeout: (String verificationId) {},
                       );

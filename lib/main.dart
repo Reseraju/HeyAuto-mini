@@ -35,11 +35,9 @@ void main() async {
   //FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   runApp(
     MaterialApp(
-      initialRoute: 'phone',
+      home:const ChooseRole(),
       debugShowCheckedModeBanner: false,
       routes: {
-        'phone': (context) => const MyPhone(),
-        'verify': (context) => const MyVerify(),
         'role': (context) => const ChooseRole(),
       },
     ),

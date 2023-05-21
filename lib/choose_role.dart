@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:newheyauto/authentication/phone_verification/phone.dart';
 import 'package:newheyauto/driver/drvr_home.dart';
 import 'package:newheyauto/passenger/Pass_welcome.dart';
 import '../styles.dart';
+import 'authentication/phone_verification/verify.dart';
 
-class ChooseRole extends StatelessWidget {
+class ChooseRole extends StatefulWidget {
   const ChooseRole({Key? key}) : super(key: key);
+
+  @override
+  _ChooseRoleState createState() => _ChooseRoleState();
+}
+
+class _ChooseRoleState extends State<ChooseRole> {
+  int selectedRoleIndex = -1; // Variable to store selected role index
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('HeyAuto'),
+        title: const Text('HeyAuto',style: TextStyle(color: Colors.black),),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -43,17 +52,23 @@ class ChooseRole extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 final item = rolesList[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    color: black,
-                    borderRadius: BorderRadius.circular(26),
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/$index.png'),
-                      fit: BoxFit.cover,
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedRoleIndex = index;
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: black,
+                      borderRadius: BorderRadius.circular(26),
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/$index.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
                   width: 200,
-                  margin: const EdgeInsets.only(left :10 ,right: 10),
+                  margin: const EdgeInsets.only(left: 10, right: 10),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16, bottom: 30),
                     child: Column(
@@ -67,21 +82,24 @@ class ChooseRole extends StatelessWidget {
                             children: [
                               TextButton(
                                 onPressed: () {
-                              
-                                  switch (index) {
+                                  setState(() {
+                                    selectedRoleIndex = index; // Set the selected role index
+                                  });
+
+                                  switch (selectedRoleIndex) {
                                     case 0:
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => const PassWelcome()),
+                                        MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
                                       );
                                       break;
                                     case 1:
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => const DrvrHome()),
+                                        MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
                                       );
                                       break;
-                                    // Add more cases for other list items
+                                    // Add more cases for other role indices
                                     default:
                                       break;
                                   }
@@ -91,7 +109,7 @@ class ChooseRole extends StatelessWidget {
                                       Colors.transparent),
                                   overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
                                 ),
-                                child:  Text(
+                                child: Text(
                                   rolesList[index],
                                   style: const TextStyle(
                                     color: Colors.black, // Set the text color
@@ -104,7 +122,7 @@ class ChooseRole extends StatelessWidget {
                       ],
                     ),
                   ),
-                );
+                ));
               },
             ),
           ),
