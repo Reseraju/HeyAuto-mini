@@ -150,7 +150,7 @@ class _PassWelcomeState extends State<PassWelcome> {
         status[Permission.phone]!.isGranted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const GMap()),
+        MaterialPageRoute(builder: (context) =>  const GMap()),
       );
     } else {
       final isLocationGranted = status[Permission.location]!.isGranted;

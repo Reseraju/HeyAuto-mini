@@ -1,9 +1,11 @@
-import 'dart:math';
+import 'dart:math' show cos, sqrt, asin;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:newheyauto/passenger/choose_driver.dart';
 import '../../constants/constants.dart';
 
 class GMap extends StatefulWidget {
@@ -16,21 +18,9 @@ class GMap extends StatefulWidget {
 class _GMapState extends State<GMap> {
   final Map<String, Marker> _markers = {};
   late GoogleMapController _mapController;
+
   Position? _currentPosition;
-
-  // Object for PolylinePoints
-  late PolylinePoints polylinePoints;
-
-  // List of coordinates to join
-  List<LatLng> polylineCoordinates = [];
-
-  // Map storing polylines created by connecting two points
-  Map<PolylineId, Polyline> polylines = {};
-
-  
-
   String _currentAddress = '';
-
 
   final startAddressFocusNode = FocusNode();
   final desrinationAddressFocusNode = FocusNode();
@@ -44,14 +34,38 @@ class _GMapState extends State<GMap> {
 
   Set<Marker> markers = {};
 
+  // Object for PolylinePoints
+  late PolylinePoints polylinePoints;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  // List of coordinates to join
+  List<LatLng> polylineCoordinates = [];
+  // Map storing polylines created by connecting two points
+  Map<PolylineId, Polyline> polylines = {};
 
-  @override
-  void initState() {
-    super.initState();
-    _getCurrentLocation();
+/*  //bottom navbar
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
+*/
+
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _openDrawer() {
+    _scaffoldKey.currentState?.openDrawer();
+  }
+
+  void _closeDrawer() {
+    Navigator.of(context).pop();
+  }
+
+  late FirebaseAuth auth;
+  String? phoneNumber;
+
+  //final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Widget _textField({
     required TextEditingController controller,
@@ -82,7 +96,7 @@ class _GMapState extends State<GMap> {
               Radius.circular(10.0),
             ),
             borderSide: BorderSide(
-              color: Colors.grey.shade400,
+              color: Colors.green.shade400,
               width: 2,
             ),
           ),
@@ -142,9 +156,10 @@ class _GMapState extends State<GMap> {
 
     // Adding the coordinates to the list
     if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
+      for (int i = 0; i < result.points.length; i++) {
+        PointLatLng point = result.points[i];
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
+      }
     }
 
     // Defining an ID
@@ -241,8 +256,6 @@ class _GMapState extends State<GMap> {
       double northEastLatitude = maxy;
       double northEastLongitude = maxx;
 
-      
-
       // Accommodate the two locations within the
       // camera view of the map
       _mapController.animateCamera(
@@ -254,7 +267,6 @@ class _GMapState extends State<GMap> {
           100.0,
         ),
       );
-
 
       await _createPolylines(startLatitude, startLongitude, destinationLatitude,
           destinationLongitude);
@@ -284,6 +296,8 @@ class _GMapState extends State<GMap> {
     return false;
   }
 
+  // Formula for calculating distance between two coordinates
+  // https://stackoverflow.com/a/54138876/11910277
   double _coordinateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -293,11 +307,28 @@ class _GMapState extends State<GMap> {
     return 12742 * asin(sqrt(a));
   }
 
-
-
   Future<void> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
+
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+        .then((Position position) async {
+      setState(() {
+        _currentPosition = position;
+        print('CURRENT POS: $_currentPosition');
+        _mapController.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(position.latitude, position.longitude),
+              zoom: 18.0,
+            ),
+          ),
+        );
+      });
+      await _getAddress();
+    }).catchError((e) {
+      print(e);
+    });
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -428,9 +459,24 @@ class _GMapState extends State<GMap> {
     _markers[position.toString()] = marker;
   }
 
+  void getPhoneNumber() {
+    // Get the current user's phone number
+    phoneNumber = auth.currentUser?.phoneNumber;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    auth = FirebaseAuth.instance;
+    getPhoneNumber();
+    _getCurrentLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
@@ -442,7 +488,86 @@ class _GMapState extends State<GMap> {
         leading: IconButton(
           icon: const Icon(Icons.menu),
           color: Colors.black,
-          onPressed: () {},
+          onPressed: () {
+            _openDrawer();
+          },
+        ),
+      ),
+      drawer: SafeArea(
+        child: Drawer(
+          child: Column(
+            children: [
+              Container(
+                color: Colors.green.shade400,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      color: Colors.white,
+                      onPressed: _closeDrawer,
+                    ),
+                  ],
+                ),
+              ),
+              UserAccountsDrawerHeader(
+                accountName: const Text('My Profile'),
+                accountEmail: Text(phoneNumber!),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    Icons.person,
+                    color: Colors.black,
+                  ),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade400,
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Home'),
+                onTap: () {
+                  // Handle Home screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('Ride History'),
+                onTap: () {
+                  // Handle Ride History screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.payment),
+                title: const Text('Payment'),
+                onTap: () {
+                  // Handle Ride History screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+                onTap: () {
+                  // Handle Ride History screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About'),
+                onTap: () {
+                  // Handle Ride History screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.help),
+                title: const Text('support'),
+                onTap: () {
+                  // Handle Ride History screen navigation
+                },
+              ),
+            ],
+          ),
         ),
       ),
       body: Stack(children: [
@@ -506,144 +631,172 @@ class _GMapState extends State<GMap> {
         ),
         //SizedBox(height: 5),
         SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left:90.0, top:150),
-            child: ElevatedButton(
-              onPressed: (_startAddress != '' &&
-                      _destinationAddress != '')
-                  ? () async {
-                      startAddressFocusNode.unfocus();
-                      desrinationAddressFocusNode.unfocus();
-                      setState(() {
-                        if (_markers.isNotEmpty) _markers.clear();
-                        if (polylines.isNotEmpty){
-                          polylines.clear();
-                        }
-                          
-                        if (polylineCoordinates.isNotEmpty){
-                          polylineCoordinates.clear();
-                        }
-                        _placeDistance = null;
-                      });
-                  
-                      _calculateDistance().then((isCalculated) {
-                        if (isCalculated) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Distance Calculated Sucessfully'),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Error Calculating Distance'),
-                            ),
-                          );
-                        }
-                      });
-                    }
-                  : null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Show Route'.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ),
-            ),
-          )
-        ),
-          SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ClipOval(
-                    child: Material(
-                      color: Colors.orange.shade100, // button color
-                      child: InkWell(
-                        splashColor: Colors.orange, // inkwell color
-                        child: const SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: Icon(Icons.add),
-                        ),
-                        onTap: () {
-                          _mapController.animateCamera(
-                            CameraUpdate.zoomIn(),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ClipOval(
-                    child: Material(
-                      color: Colors.orange.shade100, // button color
-                      child: InkWell(
-                        splashColor: Colors.orange, // inkwell color
-                        child: const SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: Icon(Icons.remove),
-                        ),
-                        onTap: () {
-                          _mapController.animateCamera(
-                            CameraUpdate.zoomOut(),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+          padding: const EdgeInsets.only(left: 100.0, top: 150),
+          child: ElevatedButton(
+            onPressed: (_startAddress != '' && _destinationAddress != '')
+                ? () async {
+                    startAddressFocusNode.unfocus();
+                    desrinationAddressFocusNode.unfocus();
+                    setState(() {
+                      if (_markers.isNotEmpty) _markers.clear();
+                      if (polylines.isNotEmpty) {
+                        polylines.clear();
+                      }
+
+                      if (polylineCoordinates.isNotEmpty) {
+                        polylineCoordinates.clear();
+                      }
+                      _placeDistance = null;
+                    });
+
+                    _calculateDistance().then((isCalculated) {
+                      if (isCalculated) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Distance Calculated Sucessfully'),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Error Calculating Distance'),
+                          ),
+                        );
+                      }
+                    });
+
+                    // Add a delay of 2 seconds
+                    await Future.delayed(const Duration(seconds: 2));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  ChooseDrvr(startLocation: _startAddress,destinationLocation: _destinationAddress,)),
+                    );
+                  }
+                : null,
+            style: ButtonStyle(
+              backgroundColor:
+                  MaterialStateProperty.all<Color>(Colors.green.shade400),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Confirm'.toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15.0,
+                ),
               ),
             ),
           ),
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 10.0, bottom: 80.0),
-                child: ClipOval(
+        )),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ClipOval(
                   child: Material(
                     color: Colors.orange.shade100, // button color
                     child: InkWell(
                       splashColor: Colors.orange, // inkwell color
                       child: const SizedBox(
-                        width: 56,
-                        height: 56,
-                        child: Icon(Icons.my_location),
+                        width: 50,
+                        height: 50,
+                        child: Icon(Icons.add),
                       ),
                       onTap: () {
                         _mapController.animateCamera(
-                          CameraUpdate.newCameraPosition(
-                            CameraPosition(
-                              target: LatLng(
-                                _currentPosition!.latitude,
-                                _currentPosition!.longitude,
-                              ),
-                              zoom: 18.0,
-                            ),
-                          ),
+                          CameraUpdate.zoomIn(),
                         );
                       },
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+                ClipOval(
+                  child: Material(
+                    color: Colors.orange.shade100, // button color
+                    child: InkWell(
+                      splashColor: Colors.orange, // inkwell color
+                      child: const SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: Icon(Icons.remove),
+                      ),
+                      onTap: () {
+                        _mapController.animateCamera(
+                          CameraUpdate.zoomOut(),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Visibility(
+          visible: _placeDistance == null ? false : true,
+          child: Text(
+            'DISTANCE: $_placeDistance km',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10.0, bottom: 80.0),
+              child: ClipOval(
+                child: Material(
+                  color: Colors.orange.shade100, // button color
+                  child: InkWell(
+                    splashColor: Colors.orange, // inkwell color
+                    child: const SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Icon(Icons.my_location),
+                    ),
+                    onTap: () {
+                      _mapController.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(
+                            target: LatLng(
+                              _currentPosition!.latitude,
+                              _currentPosition!.longitude,
+                            ),
+                            zoom: 18.0,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
-       ] 
-      ),
+        ),
+      ]),
+      // bottomNavigationBar: BottomNavigationBar(
+      //     currentIndex: _selectedIndex,
+      //     onTap: _onItemTapped,
+      //     items: const [
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.home),
+      //         label: 'Home',
+      //       ),
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.history),
+      //         label: 'Ride History',
+      //       ),
+      //     ]
+      // ),
     );
   }
-  
 }
