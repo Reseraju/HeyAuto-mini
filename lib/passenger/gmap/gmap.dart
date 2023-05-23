@@ -632,7 +632,7 @@ class _GMapState extends State<GMap> {
         //SizedBox(height: 5),
         SafeArea(
             child: Padding(
-          padding: const EdgeInsets.only(left: 100.0, top: 150),
+          padding: const EdgeInsets.only(left: 130.0, top: 150),
           child: ElevatedButton(
             onPressed: (_startAddress != '' && _destinationAddress != '')
                 ? () async {
@@ -649,6 +649,11 @@ class _GMapState extends State<GMap> {
                       }
                       _placeDistance = null;
                     });
+
+                    // Update start and destination addresses
+                    _startAddress = startAddressController.text;
+                    _destinationAddress = destinationAddressController.text;
+                  
 
                     _calculateDistance().then((isCalculated) {
                       if (isCalculated) {
