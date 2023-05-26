@@ -5,6 +5,7 @@ import 'package:newheyauto/driver/drvr_home.dart';
 import 'package:newheyauto/passenger/pass_welcome.dart';
 import 'package:pinput/pinput.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyVerify extends StatefulWidget {
   final int selectedRoleIndex;
@@ -16,7 +17,42 @@ class MyVerify extends StatefulWidget {
 
 class _MyVerifyState extends State<MyVerify> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  late SharedPreferences _preferences;
 
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSharedPreferences();
+  }
+
+  void _initializeSharedPreferences() async {
+    _preferences = await SharedPreferences.getInstance();
+  }
+
+  Future<void> _storeUserRole(String role) async {
+    await _preferences.setString('userRole', role);
+    // Determine the role and navigate accordingly
+    switch (role) {
+      case 'Passenger':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PassWelcome()),
+        );
+        break;
+      case 'Driver':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const DriverHomePage()),
+        );
+        break;
+      // Add more cases for other roles
+      
+      default:
+        break;
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     final defaultPinTheme = PinTheme(
@@ -107,7 +143,8 @@ class _MyVerifyState extends State<MyVerify> {
 
                     // Sign in (or link) the user with the credential
                     await auth.signInWithCredential(credential);
-
+                    await _storeUserRole(_getUserRole());
+                    
                     // Determine the role based on user selection
                     int roleIndex = widget
                         .selectedRoleIndex; // Get the role index based on user selection;
@@ -129,19 +166,19 @@ class _MyVerifyState extends State<MyVerify> {
                         );
                         break;
                       case 1:
-                        // Store phone number in Driver collection
-                        final user = FirebaseAuth.instance.currentUser;
-                        final phoneNumber = user?.phoneNumber;
-                        final drivers =
-                            FirebaseFirestore.instance.collection('Drivers');
-                        await drivers.doc(user?.uid).set({
-                          'phone_number': phoneNumber,
-                        });
+                        // // Store phone number in Driver collection
+                        // final user = FirebaseAuth.instance.currentUser;
+                        // final phoneNumber = user?.phoneNumber;
+                        // final drivers =
+                        //     FirebaseFirestore.instance.collection('Drivers');
+                        // await drivers.doc(user?.uid).set({
+                        //   'phone_number': phoneNumber,
+                        // });
                         // Navigate to driver home page
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const DrvrHome()),
+                              builder: (context) => const DriverHomePage()),
                           (route) => false,
                         );
                         break;
@@ -196,5 +233,15 @@ class _MyVerifyState extends State<MyVerify> {
         ),
       ),
     );
+  }
+  String _getUserRole() {
+    switch (widget.selectedRoleIndex) {
+      case 0:
+        return 'Passenger';
+      case 1:
+        return 'Driver';
+      default:
+        return '';
+    }
   }
 }

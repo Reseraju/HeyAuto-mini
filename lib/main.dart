@@ -1,15 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:newheyauto/styles.dart';
-
-import 'authentication/phone_verification/phone.dart';
-import 'authentication/phone_verification/verify.dart';
 import 'choose_role.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  //await FirebaseFirestore.instance.enablePersistence();
 
   theme:
   ThemeData(
@@ -35,7 +35,7 @@ void main() async {
   //FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   runApp(
     MaterialApp(
-      home:const ChooseRole(),
+      home: const ChooseRole(),
       debugShowCheckedModeBanner: false,
       routes: {
         'role': (context) => const ChooseRole(),

@@ -58,6 +58,8 @@ dependencies:
   build_runner: ^2.3.3
   google_maps_webservice: ^0.0.19
   cloud_firestore: ^4.7.1
+  file_picker: ^5.3.1
+  
   
   
   

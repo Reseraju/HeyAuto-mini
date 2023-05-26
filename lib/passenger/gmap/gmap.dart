@@ -6,6 +6,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:newheyauto/passenger/choose_driver.dart';
+import 'package:newheyauto/passenger/components/payments.dart';
+import '../../choose_role.dart';
 import '../../constants/constants.dart';
 
 class GMap extends StatefulWidget {
@@ -541,9 +543,7 @@ class _GMapState extends State<GMap> {
               ListTile(
                 leading: const Icon(Icons.payment),
                 title: const Text('Payment'),
-                onTap: () {
-                  // Handle Ride History screen navigation
-                },
+                onTap: () {},
               ),
               ListTile(
                 leading: const Icon(Icons.settings),
@@ -564,6 +564,18 @@ class _GMapState extends State<GMap> {
                 title: const Text('support'),
                 onTap: () {
                   // Handle Ride History screen navigation
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Logout'),
+                onTap: () {
+                  FirebaseAuth.instance.signOut().then((value) {
+                  print("Passenger Signed Out");
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const ChooseRole()));
+                });
+                Navigator.pop(context);
                 },
               ),
             ],
