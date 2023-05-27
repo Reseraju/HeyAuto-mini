@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'driver_details.dart';
 
 class ChooseDrvr extends StatefulWidget {
   final String startLocation;
@@ -18,6 +21,7 @@ class ChooseDrvr extends StatefulWidget {
 
 class _ChooseDrvrState extends State<ChooseDrvr> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Stream<QuerySnapshot> getAvailableDriversStream() {
@@ -51,7 +55,6 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
     });
 
     // Notify the selected driver
-    
 
     // Show a success message to the passenger
     showDialog(
@@ -141,11 +144,7 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return  Container(
-                            height: 10, // Specify the desired height
-                            width: 10, // Specify the desired width
-                            child: const CircularProgressIndicator(),
-                          );
+                          return const Text('loading...');
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else {
@@ -158,20 +157,35 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                               return ListTile(
                                 title: Text(driverDetail.get('name')),
                                 subtitle: const Text('Availability: Available'),
-                                trailing: ElevatedButton(
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.green.shade400),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.arrow_forward,
+                                    size: 30,
                                   ),
                                   onPressed: () {
-                                    sendRideRequest(driver.id);
+                                    print(driver.id);
+                                    checkNotificationPermission(
+                                        _auth.currentUser!.uid);
+                                    print(_auth.currentUser);
+                                    //sendRideRequest(driver.id);
+                                    
+                                    // Navigate to the next page
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DriverDetails(driverId: driver.id,)),
+                                    );
                                   },
-                                  child: const Text(
-                                    'Request Ride',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
                                 ),
+                                onTap: () {
+                                  checkNotificationPermission(
+                                        _auth.currentUser!.uid);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DriverDetails(driverId: driver.id,)),
+                                  );
+                                },
                               );
                             },
                           );
@@ -181,11 +195,7 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
-                    return  Container(
-                      height: 8, // Specify the desired height
-                      width: 8, // Specify the desired width
-                      child: const CircularProgressIndicator(),
-                    );
+                    return const Text('No drivers found');
                   }
                 },
               ),
@@ -195,4 +205,66 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
       ),
     );
   }
+
+  Future<void> checkNotificationPermission(String passengerId) async {
+    final settings = await FirebaseMessaging.instance.getNotificationSettings();
+    final isGranted =
+        settings.authorizationStatus == AuthorizationStatus.authorized;
+
+    _firebaseMessaging.requestPermission();
+
+    if (isGranted) {
+      // Permission has been granted
+      print('Notification permission granted');
+
+      // Retrieve the device token
+      String? passDevicetoken = await FirebaseMessaging.instance.getToken();
+      savePassengerDeviceToken(passengerId, passDevicetoken!);
+      if (passDevicetoken != null) {
+        // Device token is available
+        print('Device token: $passDevicetoken');
+        // Use the device token to send notifications to the passenger
+      } else {
+        // Device token is not available
+        print('Device token is null');
+      }
+    } else {
+      // Permission has not been granted
+      print('Notification permission not granted');
+    }
+  }
+
+  Future<void> savePassengerDeviceToken(
+      String passengerId, String deviceToken) async {
+    try {
+      final collection = FirebaseFirestore.instance.collection('Passengers');
+      await collection
+          .doc(passengerId)
+          .set({'deviceToken': deviceToken}, SetOptions(merge: true));
+      print('Passenger device token saved in Firestore');
+    } catch (e) {
+      print('Error saving passenger device token in Firestore: $e');
+    }
+  }
 }
+
+
+//  Request Ride Button
+
+//  ElevatedButton(
+//                                   style: ButtonStyle(
+//                                     backgroundColor:
+//                                         MaterialStateProperty.all<Color>(
+//                                             Colors.green.shade400),
+//                                   ),
+//                                   onPressed: () {
+//                                     checkNotificationPermission(
+//                                         _auth.currentUser!.uid);
+//                                     print(_auth.currentUser);
+//                                     sendRideRequest(driver.id);
+//                                   },
+//                                   child: const Text(
+//                                     'Request Ride',
+//                                     style: TextStyle(color: Colors.white),
+//                                   ),
+//                                 ),

@@ -59,6 +59,8 @@ dependencies:
   google_maps_webservice: ^0.0.19
   cloud_firestore: ^4.7.1
   file_picker: ^5.3.1
+  firebase_messaging: ^14.6.1
+  flutter_local_notifications: ^14.1.0
   
   
   

@@ -1,11 +1,15 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:newheyauto/driver/drvr_reg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 import '../choose_role.dart';
+import '../main.dart';
 
 class DriverHomePage extends StatefulWidget {
   const DriverHomePage({Key? key}) : super(key: key);
@@ -105,10 +109,84 @@ class _DriverHomePageState extends State<DriverHomePage> {
   @override
   void initState() {
     super.initState();
-    _availabilityCollection = FirebaseFirestore.instance.collection(
-        'Drvr_Availability'); 
+    _availabilityCollection =
+        FirebaseFirestore.instance.collection('Drvr_Availability');
     getPhoneNumber();
     _getDriverAvailability();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                color: Colors.blue,
+                playSound: true,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(notification.title!),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Text(notification.body!)],
+                  ),
+                ),
+              );
+            });
+      }
+    });
+  }
+
+  Future<void> _sendNotificationToPassenger(
+      String passengerToken, bool isAccepted) async {
+    try {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'your_channel_id',
+        'your_channel_name',
+        channelDescription: 'your_channel_description',
+        importance: Importance.high,
+        playSound: true,
+        icon: '@mipmap/ic_launcher',
+      );
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+
+      final title = isAccepted ? 'Ride Accepted' : 'Ride Rejected';
+      final body = isAccepted
+          ? 'Your ride request has been accepted by the driver.'
+          : 'Your ride request has been rejected by the driver.';
+
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        title,
+        body,
+        platformChannelSpecifics,
+        payload: 'default_notification_channel',
+      );
+    } catch (e) {
+      print('Error sending notification to passenger: $e');
+    }
   }
 
   Stream<QuerySnapshot> getRideRequestsStream() {
@@ -117,9 +195,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
       return FirebaseFirestore.instance
           .collection('RideRequests')
           .where('driverId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .where('status',
-              isEqualTo:
-                  'pending') 
+          .where('status', isEqualTo: 'pending')
           .snapshots();
     } catch (e) {
       print("error getting ride requests , $e");
@@ -138,10 +214,29 @@ class _DriverHomePageState extends State<DriverHomePage> {
       if (passengerData != null && passengerData.containsKey('phone_number')) {
         return passengerData['phone_number'] ?? '';
       } else {
-        return ''; 
+        return '';
       }
     } catch (e) {
       print('Error getting passenger phone number: $e');
+      return '';
+    }
+  }
+
+  Future<String> getPassDeviceToken(String passengerId) async {
+    try {
+      var passengerDoc = await FirebaseFirestore.instance
+          .collection('Passengers')
+          .doc(passengerId)
+          .get();
+      var passengerData = passengerDoc.data();
+
+      if (passengerData != null && passengerData.containsKey('phone_number')) {
+        return passengerData['deviceToken'] ?? '';
+      } else {
+        return '';
+      }
+    } catch (e) {
+      print('Error getting passenger device token: $e');
       return '';
     }
   }
@@ -234,14 +329,14 @@ class _DriverHomePageState extends State<DriverHomePage> {
                 leading: const Icon(Icons.info),
                 title: const Text('About'),
                 onTap: () {
-                  // 
+                  //
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.help),
                 title: const Text('support'),
                 onTap: () {
-                  // 
+                  //
                 },
               ),
               ListTile(
@@ -272,9 +367,9 @@ class _DriverHomePageState extends State<DriverHomePage> {
                 children: <Widget>[
                   const Text(
                     'Driver Availability',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(fontSize: 26),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(width: 100),
                   Switch(
                     value: _isAvailable,
                     onChanged: (bool value) {
@@ -283,6 +378,9 @@ class _DriverHomePageState extends State<DriverHomePage> {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(
+              height: 40,
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -306,6 +404,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
                         var passengerId = rideRequest['passengerId'];
                         var start = rideRequest['startLocation'];
                         var destination = rideRequest['destinationLocation'];
+
                         //var passengerName = rideRequest['passengerName'];
 
                         return FutureBuilder<String>(
@@ -322,16 +421,25 @@ class _DriverHomePageState extends State<DriverHomePage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     FloatingActionButton(
-                                      onPressed: () {
-                                        
+                                      onPressed: () async {
+                                        sendNotificationToPassenger(
+                                            await getPassDeviceToken(
+                                                passengerId),
+                                            'Your ride Request has been accepted!Enjoy your ride!',
+                                            'Request Accepted');
                                       },
                                       backgroundColor: Colors.green,
                                       child: const Icon(Icons.check),
                                     ),
                                     const SizedBox(width: 10),
                                     FloatingActionButton(
-                                      onPressed: () {
-                                        
+                                      onPressed: () async {
+                                        sendNotificationToPassenger(
+                                            await getPassDeviceToken(
+                                                passengerId),
+                                            'Your ride Request has been Declined! Looks Like the Driver is on another Ride!',
+                                            'Request Declined');
+                                        declineRideRequest(requestId);
                                       },
                                       backgroundColor: Colors.red,
                                       child: const Icon(Icons.close),
@@ -343,7 +451,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
                               print("Error in snapshot");
                               return Text('Error: ${snapshot.error}');
                             } else {
-                              return const CircularProgressIndicator();
+                              return const Text('loading...');
                             }
                           },
                         );
@@ -352,7 +460,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
-                    return const CircularProgressIndicator();
+                    return const Text('No Ride Requests for now');
                   }
                 },
               ),
@@ -361,5 +469,51 @@ class _DriverHomePageState extends State<DriverHomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> sendNotificationToPassenger(
+      String passengerToken, String message, String title) async {
+    try {
+      final url = 'https://fcm.googleapis.com/fcm/send';
+      final serverKey =
+          'AAAADBzO3G0:APA91bH8W5aIKxbtOASlgJkKx0IgkE8MYsRr-9LMoOHMaYd2BdFP7iI2H4rDfXvXaBbZAEduIsDgsEpAoCV2Z4i9Tv1_nN36DR7jY21Xbwcf3UqzHrxrIGdZxmYNMkufmYaZOh9D_6IU';
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverKey',
+        },
+        body: json.encode({
+          'to': passengerToken,
+          'notification': {
+            'body': message,
+            'title': title,
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Notification sent successfully
+        print('Notification sent to the passenger');
+      } else {
+        // Error occurred while sending the notification
+        print('Error sending notification to the passenger');
+      }
+    } catch (e) {
+      // Exception occurred during the HTTP request
+      print('Exception sending notification to the passenger: $e');
+    }
+  }
+
+  Future<void> declineRideRequest(String requestId) async {
+    try {
+      final rideRequestRef =
+          FirebaseFirestore.instance.collection('RideRequests').doc(requestId);
+      await rideRequestRef.delete();
+      print('Ride request declined and removed successfully');
+    } catch (e) {
+      print('Error declining ride request: $e');
+    }
   }
 }
