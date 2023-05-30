@@ -61,6 +61,7 @@ dependencies:
   file_picker: ^5.3.1
   firebase_messaging: ^14.6.1
   flutter_local_notifications: ^14.1.0
+  flutter_rating_bar: ^4.0.1
   
   
   
@@ -92,6 +93,7 @@ flutter:
   assets:
     - assets/images/
     - assets/locations.json
+    - assets/videos/
   
 
   # An image asset can refer to one or more resolution-specific "variants", see

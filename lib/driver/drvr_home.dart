@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:newheyauto/driver/drvr_reg.dart';
+import 'package:newheyauto/driver/ride_history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 import '../choose_role.dart';
 import '../main.dart';
+import 'drvr_ratings.dart';
 
 class DriverHomePage extends StatefulWidget {
   const DriverHomePage({Key? key}) : super(key: key);
@@ -21,6 +23,9 @@ class DriverHomePage extends StatefulWidget {
 class _DriverHomePageState extends State<DriverHomePage> {
   bool _isAvailable = false;
   late CollectionReference _availabilityCollection;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   late FirebaseAuth auth;
   String? phoneNumber;
@@ -157,37 +162,6 @@ class _DriverHomePageState extends State<DriverHomePage> {
     });
   }
 
-  Future<void> _sendNotificationToPassenger(
-      String passengerToken, bool isAccepted) async {
-    try {
-      const AndroidNotificationDetails androidPlatformChannelSpecifics =
-          AndroidNotificationDetails(
-        'your_channel_id',
-        'your_channel_name',
-        channelDescription: 'your_channel_description',
-        importance: Importance.high,
-        playSound: true,
-        icon: '@mipmap/ic_launcher',
-      );
-      const NotificationDetails platformChannelSpecifics =
-          NotificationDetails(android: androidPlatformChannelSpecifics);
-
-      final title = isAccepted ? 'Ride Accepted' : 'Ride Rejected';
-      final body = isAccepted
-          ? 'Your ride request has been accepted by the driver.'
-          : 'Your ride request has been rejected by the driver.';
-
-      await flutterLocalNotificationsPlugin.show(
-        0,
-        title,
-        body,
-        platformChannelSpecifics,
-        payload: 'default_notification_channel',
-      );
-    } catch (e) {
-      print('Error sending notification to passenger: $e');
-    }
-  }
 
   Stream<QuerySnapshot> getRideRequestsStream() {
     try {
@@ -310,7 +284,23 @@ class _DriverHomePageState extends State<DriverHomePage> {
                 leading: const Icon(Icons.history),
                 title: const Text('Ride History'),
                 onTap: () {
-                  //
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => RideHistoryPage()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.home),
+                title: const Text('Your Ratings'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          DriverRatingsPage(driverId: _auth.currentUser!.uid),
+                    ),
+                  );
                 },
               ),
               ListTile(
@@ -425,8 +415,11 @@ class _DriverHomePageState extends State<DriverHomePage> {
                                         sendNotificationToPassenger(
                                             await getPassDeviceToken(
                                                 passengerId),
-                                            'Your ride Request has been accepted!Enjoy your ride!',
+                                            'Your ride Request from $start to $destination has been accepted!Enjoy your ride!',
                                             'Request Accepted');
+                                        acceptRideRequest(requestId);
+
+                                        //sendNotificationToDriver(_auth.currentUser!.uid);
                                       },
                                       backgroundColor: Colors.green,
                                       child: const Icon(Icons.check),
@@ -496,7 +489,8 @@ class _DriverHomePageState extends State<DriverHomePage> {
       if (response.statusCode == 200) {
         // Notification sent successfully
         print('Notification sent to the passenger');
-      } else {
+      }
+      {
         // Error occurred while sending the notification
         print('Error sending notification to the passenger');
       }
@@ -514,6 +508,123 @@ class _DriverHomePageState extends State<DriverHomePage> {
       print('Ride request declined and removed successfully');
     } catch (e) {
       print('Error declining ride request: $e');
+    }
+  }
+
+  Future<void> acceptRideRequest(String requestId) async {
+    try {
+      final rideRequestRef =
+          FirebaseFirestore.instance.collection('RideRequests').doc(requestId);
+
+      // Update status to "accepted" in the ride request document
+      await rideRequestRef.update({'status': 'accepted'});
+
+      final rideRequestDoc = await rideRequestRef.get();
+
+      if (rideRequestDoc.exists) {
+        final rideRequestData = rideRequestDoc.data();
+        final passengerId = rideRequestData!['passengerId'];
+        final driverId = rideRequestData['driverId'];
+
+        // Move ride request details to rides subcollection in the Passengers collection
+        final passengerRidesRef = FirebaseFirestore.instance
+            .collection('Passengers')
+            .doc(passengerId)
+            .collection('rides');
+        await passengerRidesRef.add(rideRequestData);
+
+        // Store the ride request details in the acceptedRides subcollection of the Drivers collection
+        final driverAcceptedRidesRef = FirebaseFirestore.instance
+            .collection('Drivers')
+            .doc(driverId)
+            .collection('acceptedRides');
+        await driverAcceptedRidesRef.add(rideRequestData);
+
+        print(
+            'Ride request accepted and moved to passenger\'s rides collection and driver\'s acceptedRides collection successfully');
+      } else {
+        print('Ride request document does not exist');
+      }
+    } catch (e) {
+      print('Error accepting ride request: $e');
+    }
+  }
+
+  Future<void> sendNotificationToDriver(String driverToken) async {
+    const String serverToken =
+        'AAAADBzO3G0:APA91bH8W5aIKxbtOASlgJkKx0IgkE8MYsRr-9LMoOHMaYd2BdFP7iI2H4rDfXvXaBbZAEduIsDgsEpAoCV2Z4i9Tv1_nN36DR7jY21Xbwcf3UqzHrxrIGdZxmYNMkufmYaZOh9D_6IU';
+
+    final notification = {
+      'body': 'You have accepted a ride request.',
+      'title': 'Ride Request Accepted',
+      'sound': 'default',
+    };
+
+    final data = {
+      'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+      'status': 'accepted',
+      // Add any additional data you want to send with the notification
+    };
+
+    final message = {
+      'notification': notification,
+      'data': data,
+      'token': driverToken,
+    };
+
+    try {
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverToken',
+        },
+        body: jsonEncode(message),
+      );
+      print('Notification sent successfully.');
+    } catch (e) {
+      print('Error sending notification: $e');
+    }
+  }
+
+  Future<void> checkNotificationPermission(String driverId) async {
+    final settings = await FirebaseMessaging.instance.getNotificationSettings();
+    final isGranted =
+        settings.authorizationStatus == AuthorizationStatus.authorized;
+
+    _firebaseMessaging.requestPermission();
+
+    if (isGranted) {
+      // Permission has been granted
+      print('Notification permission granted');
+
+      // Retrieve the device token
+      String? driverDeviceToken = await FirebaseMessaging.instance.getToken();
+      savePassengerDeviceToken(driverId, driverDeviceToken!);
+      if (driverDeviceToken != null) {
+        // Device token is available
+        print('Device token: $driverDeviceToken');
+        // Use the device token to send notifications to the passenger
+      } else {
+        // Device token is not available
+        print('Device token is null');
+      }
+    } else {
+      // Permission has not been granted
+      print('Notification permission not granted');
+    }
+  }
+
+  Future<void> savePassengerDeviceToken(
+      String driverId, String deviceToken) async {
+    try {
+      final collection = FirebaseFirestore.instance.collection('Passengers');
+      await collection
+          .doc(driverId)
+          .set({'deviceToken': deviceToken}, SetOptions(merge: true));
+      print('Passenger device token saved in Firestore');
+    } catch (e) {
+      print('Error saving passenger device token in Firestore: $e');
     }
   }
 }

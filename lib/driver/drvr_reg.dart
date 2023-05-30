@@ -25,6 +25,8 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
   TextEditingController address = TextEditingController();
   TextEditingController pincode = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
+  TextEditingController autoLocation = TextEditingController();
+  TextEditingController vehicleNo = TextEditingController();
 
   String? _pollutionCertificatePath;
   String? _drivingLicensePath;
@@ -34,7 +36,7 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
     super.initState();
   }
 
-  Future<void> updateUserProfile(String name, List<String> uploadedFiles) async {
+  Future<void> updateUserProfile(String name, List<String> uploadedFiles, String vehicleNo, String autoLocation) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       final user = FirebaseAuth.instance.currentUser;
@@ -56,6 +58,8 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
         await userDoc.update({
           'name': name,
           'uploaded_files': uploadedFiles,
+          'auto_location': autoLocation,
+          'vehicle_no': vehicleNo,
         });
 
         print('User profile updated successfully.');
@@ -88,8 +92,22 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
                 const SizedBox(
                   height: 8,
                 ),
+                TextField(
+                  controller: vehicleNo,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Vehicle No',
+                  ),
+                ),
                 const SizedBox(
                   height: 8,
+                ),
+                TextField(
+                  controller: autoLocation,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Auto Stand Location',
+                  ),
                 ),
               ],
             ),
@@ -220,7 +238,7 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
       floatingActionButton: _activeStepIndex == stepList().length - 1
           ? FloatingActionButton.extended(
               onPressed: () {
-                updateUserProfile(name.text, [_pollutionCertificatePath?? '',_drivingLicensePath ?? '']);
+                updateUserProfile(name.text, [_pollutionCertificatePath?? '',_drivingLicensePath ?? ''],vehicleNo.text, autoLocation.text);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(

@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:newheyauto/passenger/choose_driver.dart';
 import 'package:newheyauto/passenger/components/payments.dart';
+import 'package:newheyauto/passenger/ride_history.dart';
 import '../../choose_role.dart';
 import '../../constants/constants.dart';
 
@@ -537,7 +538,8 @@ class _GMapState extends State<GMap> {
                 leading: const Icon(Icons.history),
                 title: const Text('Ride History'),
                 onTap: () {
-                  // Handle Ride History screen navigation
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) =>  RideHistoryPage()));
                 },
               ),
               ListTile(

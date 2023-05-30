@@ -44,38 +44,6 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
     return await Future.wait(futures);
   }
 
-  Future<void> sendRideRequest(String driverId) async {
-    // Store the temporary ride request in the database
-    await _firestore.collection('RideRequests').add({
-      'passengerId': _auth.currentUser!.uid,
-      'driverId': driverId,
-      'startLocation': widget.startLocation,
-      'destinationLocation': widget.destinationLocation,
-      'status': 'pending',
-    });
-
-    // Notify the selected driver
-
-    // Show a success message to the passenger
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Ride request sent to the driver.'),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,8 +132,8 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                                   ),
                                   onPressed: () {
                                     print(driver.id);
-                                    checkNotificationPermission(
-                                        _auth.currentUser!.uid);
+                                    // checkNotificationPermission(
+                                    //     _auth.currentUser!.uid);
                                     print(_auth.currentUser);
                                     //sendRideRequest(driver.id);
                                     
@@ -173,17 +141,16 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DriverDetails(driverId: driver.id,)),
+                                          builder: (context) => DriverDetails(driverId: driver.id, start: widget.startLocation, destination: widget.destinationLocation,)),
                                     );
                                   },
                                 ),
                                 onTap: () {
-                                  checkNotificationPermission(
-                                        _auth.currentUser!.uid);
+                                  
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => DriverDetails(driverId: driver.id,)),
+                                        builder: (context) => DriverDetails(driverId: driver.id,start: widget.startLocation, destination: widget.destinationLocation,)),
                                   );
                                 },
                               );
@@ -206,65 +173,6 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
     );
   }
 
-  Future<void> checkNotificationPermission(String passengerId) async {
-    final settings = await FirebaseMessaging.instance.getNotificationSettings();
-    final isGranted =
-        settings.authorizationStatus == AuthorizationStatus.authorized;
 
-    _firebaseMessaging.requestPermission();
 
-    if (isGranted) {
-      // Permission has been granted
-      print('Notification permission granted');
-
-      // Retrieve the device token
-      String? passDevicetoken = await FirebaseMessaging.instance.getToken();
-      savePassengerDeviceToken(passengerId, passDevicetoken!);
-      if (passDevicetoken != null) {
-        // Device token is available
-        print('Device token: $passDevicetoken');
-        // Use the device token to send notifications to the passenger
-      } else {
-        // Device token is not available
-        print('Device token is null');
-      }
-    } else {
-      // Permission has not been granted
-      print('Notification permission not granted');
-    }
-  }
-
-  Future<void> savePassengerDeviceToken(
-      String passengerId, String deviceToken) async {
-    try {
-      final collection = FirebaseFirestore.instance.collection('Passengers');
-      await collection
-          .doc(passengerId)
-          .set({'deviceToken': deviceToken}, SetOptions(merge: true));
-      print('Passenger device token saved in Firestore');
-    } catch (e) {
-      print('Error saving passenger device token in Firestore: $e');
-    }
-  }
 }
-
-
-//  Request Ride Button
-
-//  ElevatedButton(
-//                                   style: ButtonStyle(
-//                                     backgroundColor:
-//                                         MaterialStateProperty.all<Color>(
-//                                             Colors.green.shade400),
-//                                   ),
-//                                   onPressed: () {
-//                                     checkNotificationPermission(
-//                                         _auth.currentUser!.uid);
-//                                     print(_auth.currentUser);
-//                                     sendRideRequest(driver.id);
-//                                   },
-//                                   child: const Text(
-//                                     'Request Ride',
-//                                     style: TextStyle(color: Colors.white),
-//                                   ),
-//                                 ),
