@@ -5,9 +5,10 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:newheyauto/passenger/choose_driver.dart';
+import 'package:newheyauto/passenger/pages/choose_driver.dart';
 import 'package:newheyauto/passenger/components/payments.dart';
-import 'package:newheyauto/passenger/ride_history.dart';
+import 'package:newheyauto/passenger/pages/pre_book.dart';
+import 'package:newheyauto/passenger/pages/ride_history.dart';
 import '../../choose_role.dart';
 import '../../constants/constants.dart';
 
@@ -157,6 +158,7 @@ class _GMapState extends State<GMap> {
       travelMode: TravelMode.transit,
     );
 
+    print(AppConstants.API_KEY);
     // Adding the coordinates to the list
     if (result.points.isNotEmpty) {
       for (int i = 0; i < result.points.length; i++) {
@@ -498,89 +500,96 @@ class _GMapState extends State<GMap> {
       ),
       drawer: SafeArea(
         child: Drawer(
-          child: Column(
-            children: [
-              Container(
-                color: Colors.green.shade400,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      color: Colors.white,
-                      onPressed: _closeDrawer,
-                    ),
-                  ],
-                ),
-              ),
-              UserAccountsDrawerHeader(
-                accountName: const Text('My Profile'),
-                accountEmail: Text(phoneNumber!),
-                currentAccountPicture: const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.black,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.green.shade400,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        color: Colors.white,
+                        onPressed: _closeDrawer,
+                      ),
+                    ],
                   ),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade400,
+                UserAccountsDrawerHeader(
+                  accountName: const Text('My Profile'),
+                  accountEmail: Text(phoneNumber!),
+                  currentAccountPicture: const CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.black,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade400,
+                  ),
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Home'),
-                onTap: () {
-                  // Handle Home screen navigation
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.history),
-                title: const Text('Ride History'),
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) =>  RideHistoryPage()));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.payment),
-                title: const Text('Payment'),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () {
-                  // Handle Ride History screen navigation
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text('About'),
-                onTap: () {
-                  // Handle Ride History screen navigation
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('support'),
-                onTap: () {
-                  // Handle Ride History screen navigation
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Logout'),
-                onTap: () {
-                  FirebaseAuth.instance.signOut().then((value) {
-                  print("Passenger Signed Out");
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => const ChooseRole()));
-                });
-                Navigator.pop(context);
-                },
-              ),
-            ],
+                ListTile(
+                  leading: const Icon(Icons.home),
+                  title: const Text('Home'),
+                  onTap: _closeDrawer,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text('Ride History'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RideHistoryPage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.payment),
+                  title: const Text('Payment'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('pre-Book Ride'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PreBookRidePage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About'),
+                  onTap: () {
+                    // Handle Ride History screen navigation
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help),
+                  title: const Text('support'),
+                  onTap: () {
+                    // Handle Ride History screen navigation
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: () {
+                    FirebaseAuth.instance.signOut().then((value) {
+                      print("Passenger Signed Out");
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChooseRole()));
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -667,7 +676,6 @@ class _GMapState extends State<GMap> {
                     // Update start and destination addresses
                     _startAddress = startAddressController.text;
                     _destinationAddress = destinationAddressController.text;
-                  
 
                     _calculateDistance().then((isCalculated) {
                       if (isCalculated) {
@@ -690,7 +698,10 @@ class _GMapState extends State<GMap> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>  ChooseDrvr(startLocation: _startAddress,destinationLocation: _destinationAddress,)),
+                          builder: (context) => ChooseDrvr(
+                                startLocation: _startAddress,
+                                destinationLocation: _destinationAddress,
+                              )),
                     );
                   }
                 : null,

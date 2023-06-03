@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:newheyauto/authentication/phone_verification/phone.dart';
-import 'package:newheyauto/driver/drvr_home.dart';
+import 'package:newheyauto/driver/pages/drvr_home.dart';
 import 'package:newheyauto/passenger/Pass_welcome.dart';
 import '../styles.dart';
 import 'authentication/phone_verification/verify.dart';
@@ -40,6 +40,7 @@ class _ChooseRoleState extends State<ChooseRole> {
             'Choose Your Role',
             style: TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
           ),
           const SizedBox(

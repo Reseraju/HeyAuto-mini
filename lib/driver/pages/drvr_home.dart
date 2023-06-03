@@ -4,13 +4,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:newheyauto/driver/drvr_reg.dart';
-import 'package:newheyauto/driver/ride_history.dart';
+import 'package:newheyauto/driver/pages/drvr_reg.dart';
+import 'package:newheyauto/driver/pages/ride_history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../choose_role.dart';
-import '../main.dart';
+import '../../choose_role.dart';
+import '../../main.dart';
 import 'drvr_ratings.dart';
 
 class DriverHomePage extends StatefulWidget {
@@ -236,114 +236,118 @@ class _DriverHomePageState extends State<DriverHomePage> {
       ),
       drawer: SafeArea(
         child: Drawer(
-          child: Column(
-            children: [
-              Container(
-                color: Colors.green.shade400,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      color: Colors.white,
-                      onPressed: _closeDrawer,
-                    ),
-                  ],
-                ),
-              ),
-              UserAccountsDrawerHeader(
-                accountName: const Text('My Profile'),
-                accountEmail: Text(phoneNumber!),
-                currentAccountPicture: const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.black,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.green.shade400,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        color: Colors.white,
+                        onPressed: _closeDrawer,
+                      ),
+                    ],
                   ),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade400,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.file_upload),
-                title: const Text('Upload Documents'),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const DrvrRegistration()));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Home'),
-                onTap: _closeDrawer,
-              ),
-              ListTile(
-                leading: const Icon(Icons.history),
-                title: const Text('Ride History'),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => RideHistoryPage()));
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.home),
-                title: const Text('Your Ratings'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          DriverRatingsPage(driverId: _auth.currentUser!.uid),
+                UserAccountsDrawerHeader(
+                  accountName: const Text('My Profile'),
+                  accountEmail: Text(phoneNumber!),
+                  currentAccountPicture: const CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.black,
                     ),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.payment),
-                title: const Text('Payment'),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () {
-                  //
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text('About'),
-                onTap: () {
-                  //
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.help),
-                title: const Text('support'),
-                onTap: () {
-                  //
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text('Logout'),
-                onTap: () {
-                  FirebaseAuth.instance.signOut().then((value) {
-                    print("Driver Signed Out");
-                    Navigator.pushReplacement(
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade400,
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.file_upload),
+                  title: const Text('Upload Documents'),
+                  onTap: () {
+                    Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ChooseRole()));
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+                            builder: (context) => const DrvrRegistration()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.home),
+                  title: const Text('Home'),
+                  onTap: _closeDrawer,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text('Ride History'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RideHistoryPage()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.reviews_outlined
+                  ),
+                  title: const Text('Your Ratings'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DriverRatingsPage(driverId: _auth.currentUser!.uid),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.payment),
+                  title: const Text('Payment'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Settings'),
+                  onTap: () {
+                    //
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About'),
+                  onTap: () {
+                    //
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.help),
+                  title: const Text('support'),
+                  onTap: () {
+                    //
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: () {
+                    FirebaseAuth.instance.signOut().then((value) {
+                      print("Driver Signed Out");
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const ChooseRole()));
+                    });
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

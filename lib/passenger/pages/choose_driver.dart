@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:newheyauto/passenger/pages/driverDetails.dart';
 
-import 'driver_details.dart';
 
 class ChooseDrvr extends StatefulWidget {
   final String startLocation;
@@ -44,6 +44,22 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
     return await Future.wait(futures);
   }
 
+  double calculateEstimatedFare(String destLocation) {
+    String destinationLocation = destLocation.trim();
+    if (destinationLocation == 'bharananganam' ||
+        destinationLocation == 'Bharananganam' ||
+        destinationLocation == 'bharanaganam' ||
+        destinationLocation == 'baranaganam') {
+      return 120.0;
+    } else if (destinationLocation == 'pravithanam' ||
+        destinationLocation == 'Pravithanam') {
+      return 150.0;
+    } else {
+      // Return a default fare if the destination is not recognized
+      return 0.0;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,9 +78,9 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
             const SizedBox(
               height: 20,
             ),
-            const Text(
-              'Estimated Fare',
-              style: TextStyle(
+            Text(
+              'Estimated Fare: ${calculateEstimatedFare(widget.destinationLocation)}',
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -136,21 +152,30 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
                                     //     _auth.currentUser!.uid);
                                     print(_auth.currentUser);
                                     //sendRideRequest(driver.id);
-                                    
+
                                     // Navigate to the next page
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => DriverDetails(driverId: driver.id, start: widget.startLocation, destination: widget.destinationLocation,)),
+                                          builder: (context) => DriverDetails(
+                                                driverId: driver.id,
+                                                start: widget.startLocation,
+                                                destination:
+                                                    widget.destinationLocation,
+                                              )),
                                     );
                                   },
                                 ),
                                 onTap: () {
-                                  
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => DriverDetails(driverId: driver.id,start: widget.startLocation, destination: widget.destinationLocation,)),
+                                        builder: (context) => DriverDetails(
+                                              driverId: driver.id,
+                                              start: widget.startLocation,
+                                              destination:
+                                                  widget.destinationLocation,
+                                            )),
                                   );
                                 },
                               );
@@ -172,7 +197,4 @@ class _ChooseDrvrState extends State<ChooseDrvr> {
       ),
     );
   }
-
-
-
 }

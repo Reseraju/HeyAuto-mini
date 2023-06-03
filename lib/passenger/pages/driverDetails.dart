@@ -298,9 +298,18 @@ class _DriverDetailsState extends State<DriverDetails> {
                       // Existing code...
       
                       // Display the ratings and reviews
-                      const Text(
-                        'Ratings and Reviews:',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      const SizedBox(height: 20,),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: const [
+                            const Text(
+                              'Ratings and Reviews:',
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
                       ListView.builder(
                         shrinkWrap: true,
@@ -348,7 +357,8 @@ class _DriverDetailsState extends State<DriverDetails> {
   Future<List<Map<String, dynamic>>> getDriverRatings(String driverId) async {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('DriverRatings')
-        .where('driverId', isEqualTo: driverId)
+        .doc(driverId)
+        .collection('Ratings')
         .get();
 
     return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();

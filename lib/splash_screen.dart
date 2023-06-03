@@ -67,6 +67,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 30,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  'Explore new ways to travel with HeyAuto',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

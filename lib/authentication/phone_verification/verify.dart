@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:newheyauto/authentication/phone_verification/phone.dart';
-import 'package:newheyauto/driver/drvr_home.dart';
+import 'package:newheyauto/driver/pages/drvr_home.dart';
 import 'package:newheyauto/passenger/pass_welcome.dart';
 import 'package:pinput/pinput.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
