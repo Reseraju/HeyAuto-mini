@@ -19,20 +19,20 @@ class _ChooseRoleState extends State<ChooseRole> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('HeyAuto',style: TextStyle(color: Colors.black),),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_rounded,
-            color: Colors.black,
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('HeyAuto',style: TextStyle(color: Colors.black),),
+      //   backgroundColor: Colors.transparent,
+      //   elevation: 0,
+      //   leading: IconButton(
+      //     onPressed: () {
+      //       Navigator.pop(context);
+      //     },
+      //     icon: const Icon(
+      //       Icons.arrow_back_ios_rounded,
+      //       color: Colors.black,
+      //     ),
+      //   ),
+      // ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

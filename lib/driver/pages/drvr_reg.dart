@@ -239,11 +239,6 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
           ? FloatingActionButton.extended(
               onPressed: () {
                 updateUserProfile(name.text, [_pollutionCertificatePath?? '',_drivingLicensePath ?? ''],vehicleNo.text, autoLocation.text);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const DriverHomePage()),
-                );
               },
               label: const Text('Submit'),
               icon: const Icon(Icons.check),
