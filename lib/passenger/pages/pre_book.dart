@@ -148,7 +148,7 @@ class _PreBookRidePageState extends State<PreBookRidePage> {
                   }
 
                   List<DropdownMenuItem<String>> dropdownItems = [];
-                  dropdownItems.add(DropdownMenuItem<String>(
+                  dropdownItems.add(const DropdownMenuItem<String>(
                     value: '', // Empty value for the default item
                     child: Text('Select a driver'),
                   ));
@@ -207,6 +207,7 @@ class _PreBookRidePageState extends State<PreBookRidePage> {
                     'passenger_id': FirebaseAuth.instance.currentUser!.uid,
                     'driver_id': selectedDriverId,
                     'driver_name': driverName,
+                    'status': 'Pending',
                   }).then((value) {
                     // Pre-booked ride request successfully stored
                     print('Pre-booked ride request stored in Firestore');

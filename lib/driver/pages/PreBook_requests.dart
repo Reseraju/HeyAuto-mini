@@ -19,6 +19,63 @@ class _PreBookRequestsState extends State<PreBookRequests> {
     driverId = FirebaseAuth.instance.currentUser!.uid;
   }
 
+  void cancelRequest(String requestId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cancel Ride Request'),
+          content: const Text('Are you sure you want to cancel this ride request?'),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                // Update the ride request status to "Cancelled"
+                FirebaseFirestore.instance
+                  .collection('PreBookRide')
+                  .doc(requestId)
+                  .update({'status': 'Cancelled'})
+                  .then((_) {
+                    // Request cancelled successfully
+                    print('Ride request cancelled');
+                    // Perform any other necessary actions
+                  })
+                  .catchError((error) {
+                    // An error occurred while cancelling the request
+                    print('Error cancelling ride request: $error');
+                  });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void acceptRequest(String requestId) {
+    FirebaseFirestore.instance
+      .collection('PreBookRide')
+      .doc(requestId)
+      .update({'status': 'Accepted'})
+      .then((_) {
+        // Request accepted successfully
+        print('Ride request accepted');
+        // Perform any other necessary actions
+      })
+      .catchError((error) {
+        // An error occurred while accepting the request
+        print('Error accepting ride request: $error');
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +106,18 @@ class _PreBookRequestsState extends State<PreBookRequests> {
               final pickupLocation = doc['pickup_location'];
               final destination = doc['destination'];
               final dateTime = doc['date_time'].toDate();
+              final status = doc['status'];
+
+              Color statusColor;
+              if (status == 'Pending') {
+                statusColor = Colors.yellow;
+              } else if (status == 'Accepted') {
+                statusColor = Colors.green;
+              } else if (status == 'Cancelled') {
+                statusColor = Colors.red;
+              } else {
+                statusColor = Colors.black;
+              }
 
               return Card(
                 child: ListTile(
@@ -59,27 +128,42 @@ class _PreBookRequestsState extends State<PreBookRequests> {
                       Text('Pickup Location: $pickupLocation'),
                       Text('Destination: $destination'),
                       Text('Date and Time: $dateTime'),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          // Handle accept request
-                          _acceptRequest(requestId);
-                        },
-                        icon: const Icon(Icons.check),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // Handle reject request
-                          _rejectRequest(requestId);
-                        },
-                        icon: const Icon(Icons.close),
+                      Text(
+                        'Status: $status',
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
+                  trailing: status == 'Pending'
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                // Handle accept request
+                                acceptRequest(requestId);
+                              },
+                              icon: const Icon(Icons.check),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                // Handle cancel request
+                                cancelRequest(requestId);
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        )
+                      : IconButton(
+                          onPressed: () {
+                            // Handle cancel request
+                            cancelRequest(requestId);
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
                 ),
               );
             }).toList(),
@@ -87,13 +171,5 @@ class _PreBookRequestsState extends State<PreBookRequests> {
         },
       ),
     );
-  }
-
-  void _acceptRequest(String requestId) {
-    // TODO: Implement logic to accept the pre-booked request
-  }
-
-  void _rejectRequest(String requestId) {
-    // TODO: Implement logic to reject the pre-booked request
   }
 }

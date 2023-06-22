@@ -288,13 +288,12 @@ class _DriverHomePageState extends State<DriverHomePage> {
                                   children: [
                                     FloatingActionButton(
                                       onPressed: () async {
+                                        acceptRideRequest(requestId);
                                         sendNotificationToPassenger(
                                             await getPassDeviceToken(
                                                 passengerId),
                                             'Your ride Request from $start to $destination has been accepted!Enjoy your ride!',
                                             'Request Accepted');
-                                        acceptRideRequest(requestId);
-
                                         //sendNotificationToDriver(_auth.currentUser!.uid);
                                       },
                                       backgroundColor: Colors.green,
@@ -303,12 +302,12 @@ class _DriverHomePageState extends State<DriverHomePage> {
                                     const SizedBox(width: 10),
                                     FloatingActionButton(
                                       onPressed: () async {
+                                        declineRideRequest(requestId);
                                         sendNotificationToPassenger(
                                             await getPassDeviceToken(
                                                 passengerId),
                                             'Your ride Request has been Declined! Looks Like the Driver is on another Ride!',
                                             'Request Declined');
-                                        declineRideRequest(requestId);
                                       },
                                       backgroundColor: Colors.red,
                                       child: const Icon(Icons.close),

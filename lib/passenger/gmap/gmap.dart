@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:newheyauto/passenger/pages/choose_driver.dart';
 import 'package:newheyauto/passenger/components/payments.dart';
+import 'package:newheyauto/passenger/pages/preBook_home.dart';
 import 'package:newheyauto/passenger/pages/pre_book.dart';
 import 'package:newheyauto/passenger/pages/ride_history.dart';
 import '../../choose_role.dart';
@@ -557,7 +558,7 @@ class _GMapState extends State<GMap> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => PreBookRidePage()));
+                            builder: (context) => PreBookHome()));
                   },
                 ),
                 ListTile(

@@ -33,6 +33,51 @@ class _RideHistoryPageState extends State<RideHistoryPage> {
     });
   }
 
+  void deleteRideHistory() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    final passengerId = _auth.currentUser!.uid;
+    final ridesRef = FirebaseFirestore.instance
+        .collection('Drivers')
+        .doc(passengerId)
+        .collection('acceptedRides');
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Ride History'),
+          content: const Text(
+              'Are you sure you want to delete all your previous ride history?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () async {
+                // Delete each ride document
+                final querySnapshot = await ridesRef.get();
+                querySnapshot.docs.forEach((doc) {
+                  doc.reference.delete();
+                });
+
+                // Refresh ride history list
+                setState(() {
+                  rideHistory.clear();
+                });
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +85,12 @@ class _RideHistoryPageState extends State<RideHistoryPage> {
         title: const Text('Ride History',style: TextStyle(color: Colors.black),),
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.green.shade400,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: deleteRideHistory,
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: rideHistory.length,

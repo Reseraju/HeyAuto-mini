@@ -44,7 +44,7 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
     var driverName = ride['driverName'];
     var startLocation = ride['startLocation'];
     var destination = ride['destinationLocation'];
-    var estimatedFare = ride['estimatedFare'];
+    //var estimatedFare = ride['estimatedFare'];
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +63,7 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
             Text('Driver Name: $driverName'),
             Text('Start Location: $startLocation'),
             Text('Destination: $destination'),
-            Text('Estimated Fare: $estimatedFare'),
+            //Text('Estimated Fare: $estimatedFare'),
             const SizedBox(height: 24.0),
             const Text(
               'Rate the Ride:',
