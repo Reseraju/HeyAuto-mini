@@ -7,6 +7,10 @@ import 'package:newheyauto/driver/pages/drvr_home.dart';
 import 'package:newheyauto/driver/pages/drvr_ratings.dart';
 import 'package:newheyauto/driver/pages/drvr_reg.dart';
 import 'package:newheyauto/driver/pages/ride_history.dart';
+import 'package:newheyauto/components/support_page.dart';
+
+import '../../components/drvr_about.dart';
+import '../../components/pass_about.dart';
 
 class NavBarPage extends StatefulWidget {
   const NavBarPage({super.key});
@@ -197,14 +201,26 @@ class _NavBarPageState extends State<NavBarPage> {
                   leading: const Icon(Icons.info),
                   title: const Text('About'),
                   onTap: () {
-                    //
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DriverAboutPage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.help),
                   title: const Text('support'),
                   onTap: () {
-                    //
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SupportPage(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(

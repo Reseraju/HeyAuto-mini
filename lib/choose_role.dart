@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:newheyauto/authentication/phone_verification/phone.dart';
-import 'package:newheyauto/driver/pages/drvr_home.dart';
-import 'package:newheyauto/passenger/Pass_welcome.dart';
 import '../styles.dart';
-import 'authentication/phone_verification/verify.dart';
 
 class ChooseRole extends StatefulWidget {
   const ChooseRole({Key? key}) : super(key: key);
@@ -19,20 +16,6 @@ class _ChooseRoleState extends State<ChooseRole> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      // appBar: AppBar(
-      //   title: const Text('HeyAuto',style: TextStyle(color: Colors.black),),
-      //   backgroundColor: Colors.transparent,
-      //   elevation: 0,
-      //   leading: IconButton(
-      //     onPressed: () {
-      //       Navigator.pop(context);
-      //     },
-      //     icon: const Icon(
-      //       Icons.arrow_back_ios_rounded,
-      //       color: Colors.black,
-      //     ),
-      //   ),
-      // ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -40,12 +23,10 @@ class _ChooseRoleState extends State<ChooseRole> {
             'Choose Your Role',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontSize: 25,
             ),
           ),
-          const SizedBox(
-            height: 30,
-          ),
+          const SizedBox(height: 50),
           SizedBox(
             height: 250,
             child: ListView.builder(
@@ -60,70 +41,87 @@ class _ChooseRoleState extends State<ChooseRole> {
                     });
                   },
                   child: Container(
+                    width: 200,
+                    margin: const EdgeInsets.only(left: 10, right: 10),
                     decoration: BoxDecoration(
-                      color: black,
-                      borderRadius: BorderRadius.circular(26),
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/$index.png'),
-                        fit: BoxFit.cover,
-                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          offset: const Offset(0, 3),
+                          blurRadius: 6,
+                        ),
+                      ],
                     ),
-                  width: 200,
-                  margin: const EdgeInsets.only(left: 10, right: 10),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16, bottom: 30),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Stack(
                       children: [
-                        Container(
-                          color: Colors.grey[200],
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedRoleIndex = index; // Set the selected role index
-                                  });
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/images/$index.png',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedRoleIndex = index; // Set the selected role index
+                                });
 
-                                  switch (selectedRoleIndex) {
-                                    case 0:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
-                                      );
-                                      break;
-                                    case 1:
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
-                                      );
-                                      break;
-                                    // Add more cases for other role indices
-                                    default:
-                                      break;
-                                  }
-                                },
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all<Color>(
-                                      Colors.transparent),
-                                  overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                                ),
-                                child: Text(
-                                  rolesList[index],
-                                  style: const TextStyle(
-                                    color: Colors.black, // Set the text color
-                                  ),
+                                switch (selectedRoleIndex) {
+                                  case 0:
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
+                                    );
+                                    break;
+                                  case 1:
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => MyPhone(selectedRoleIndex: index)),
+                                    );
+                                    break;
+                                  // Add more cases for other role indices
+                                  default:
+                                    break;
+                                }
+                              },
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+                                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                                overlayColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                              ),
+                              child: Text(
+                                rolesList[index],
+                                style: const TextStyle(
+                                  color: Colors.white, // Set the text color
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ));
+                );
               },
             ),
           ),

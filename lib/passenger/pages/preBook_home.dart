@@ -25,7 +25,7 @@ class _PreBookHomeState extends State<PreBookHome> {
         children: [
           ListTile(
             leading: const Icon(Icons.pending),
-            title: const Text('View Pending Ride Requests'),
+            title: const Text('View Status of Ride Requests'),
             onTap: () {
               // Handle view pending ride requests option
               navigateToPendingRideRequests();

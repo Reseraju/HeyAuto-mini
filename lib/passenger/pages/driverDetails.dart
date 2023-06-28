@@ -304,7 +304,7 @@ class _DriverDetailsState extends State<DriverDetails> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: const [
-                            const Text(
+                            Text(
                               'Ratings and Reviews:',
                               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                             ),
@@ -461,6 +461,9 @@ class _DriverDetailsState extends State<DriverDetails> {
 
 
   Future<void> sendRideRequest(String driverId) async {
+    // Get the current date
+    DateTime currentDate = DateTime.now();
+
     // Store the temporary ride request in the database
     await _firestore.collection('RideRequests').add({
       'passengerId': _auth.currentUser!.uid,
@@ -470,6 +473,7 @@ class _DriverDetailsState extends State<DriverDetails> {
       'status': 'pending',
       'rating': _rating,
       'review': _review,
+      'requestDate': currentDate,
     });
 
     // Notify the selected driver

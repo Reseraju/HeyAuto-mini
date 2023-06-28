@@ -1,16 +1,20 @@
 import 'dart:math' show cos, sqrt, asin;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:newheyauto/components/pass_support.dart';
 import 'package:newheyauto/passenger/pages/choose_driver.dart';
 import 'package:newheyauto/passenger/components/payments.dart';
 import 'package:newheyauto/passenger/pages/preBook_home.dart';
 import 'package:newheyauto/passenger/pages/pre_book.dart';
 import 'package:newheyauto/passenger/pages/ride_history.dart';
+import 'package:newheyauto/passenger/pages/settings.dart';
 import '../../choose_role.dart';
+import '../../components/pass_about.dart';
 import '../../constants/constants.dart';
 
 class GMap extends StatefulWidget {
@@ -562,17 +566,33 @@ class _GMapState extends State<GMap> {
                   },
                 ),
                 ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('settings'),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SettingsPage()));
+                  },
+                ),
+                ListTile(
                   leading: const Icon(Icons.info),
                   title: const Text('About'),
                   onTap: () {
-                    // Handle Ride History screen navigation
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AboutPage()));
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.help),
                   title: const Text('support'),
                   onTap: () {
-                    // Handle Ride History screen navigation
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PassSupportPage()));
                   },
                 ),
                 ListTile(
