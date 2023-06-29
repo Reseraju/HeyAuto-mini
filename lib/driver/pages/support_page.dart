@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 
-class PassSupportPage extends StatefulWidget {
+class SupportPage extends StatefulWidget {
   @override
-  _PassSupportPageState createState() => _PassSupportPageState();
+  _SupportPageState createState() => _SupportPageState();
 }
 
-class _PassSupportPageState extends State<PassSupportPage> {
+class _SupportPageState extends State<SupportPage> {
   bool _isExpanded = false;
   List<FAQ> _faqs = [
     FAQ(
-      question: 'How do I book a ride?',
-      answer: 'To book a ride, simply open the HeyAuto app, enter your pickup location and destination, and choose your preferred driver. Once the driver accepts the request, you can take the ride.',
+      question: 'How do I sign up as a driver?',
+      answer: 'To sign up as a driver, simply download the HeyAuto app from the App Store or Google Play Store and follow the registration process. Once registered, you can start accepting ride requests.',
     ),
     FAQ(
-      question: 'What payment methods are accepted?',
-      answer: 'We accept various payment methods, including cash and digital payments. You can pay the driver directly in cash or use digital wallets such as Paytm or UPI for a seamless payment experience.',
+      question: 'How can I track my earnings?',
+      answer: 'You can easily track your earnings within the HeyAuto app. Simply navigate to the "Earnings" section, and you will find a detailed breakdown of your earnings and ride history.',
     ),
     FAQ(
-      question: 'How can I rate a driver?',
-      answer: 'You can rate a driver on the driver details page while selecting the driver or you can rate the driver in the Ride History section by selecting the ride and providing your rating.',
+      question: 'What if I have an issue with a passenger?',
+      answer: 'If you encounter any issues with a passenger, please report the incident to our support team immediately. We will investigate the matter and take appropriate actions to ensure a safe and enjoyable experience for all users.',
     ),
-    
+    // Add more FAQs as needed
   ];
 
   @override
@@ -138,7 +138,10 @@ class _PassSupportPageState extends State<PassSupportPage> {
               onPressed: () {
                 // Handle question submission
               },
-              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade400, // Set the background color
+              ),
+              child: const Text('Submit'),
             ),
           ],
         ),
@@ -153,6 +156,3 @@ class FAQ {
 
   FAQ({required this.question, required this.answer});
 }
-
-
-

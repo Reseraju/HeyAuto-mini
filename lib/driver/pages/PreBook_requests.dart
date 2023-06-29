@@ -176,22 +176,22 @@ class _PreBookRequestsState extends State<PreBookRequests> {
 
     // Initialize time zones
     tz.initializeTimeZones();
-    final location = tz.getLocation('YOUR_TIMEZONE'); // Replace with your desired timezone
+    final location = tz.getLocation('Asia/Kolkata'); // Replace with your desired timezone
 
     // Convert the DateTime to the corresponding TZDateTime based on the location
     final scheduledDate = tz.TZDateTime.from(dateTime, location);
 
     // Schedule the reminder notification
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-    0, // Notification ID
-    'Reminder', // Notification title
-    'Reminder for your appointment', // Notification body
-    scheduledDate, // Scheduled date and time in the specified timezone
-    platformChannelSpecifics,
-    //androidAllowWhileIdle: true,
-    uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-  );
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      1, // Notification ID
+      'Reminder', // Notification title
+      'Reminder for your appointment', // Notification body
+      scheduledDate, // Scheduled date and time in the specified timezone
+      platformChannelSpecifics,
+      //androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   @override

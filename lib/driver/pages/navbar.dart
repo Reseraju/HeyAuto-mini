@@ -7,10 +7,10 @@ import 'package:newheyauto/driver/pages/drvr_home.dart';
 import 'package:newheyauto/driver/pages/drvr_ratings.dart';
 import 'package:newheyauto/driver/pages/drvr_reg.dart';
 import 'package:newheyauto/driver/pages/ride_history.dart';
-import 'package:newheyauto/components/support_page.dart';
+import 'package:newheyauto/driver/pages/support_page.dart';
 
-import '../../components/drvr_about.dart';
-import '../../components/pass_about.dart';
+import 'drvr_about.dart';
+import '../../passenger/pages/pass_about.dart';
 
 class NavBarPage extends StatefulWidget {
   const NavBarPage({super.key});
@@ -188,6 +188,11 @@ class _NavBarPageState extends State<NavBarPage> {
                 ListTile(
                   leading: const Icon(Icons.payment),
                   title: const Text('Payment'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.attach_money),
+                  title: const Text('Earnings'),
                   onTap: () {},
                 ),
                 ListTile(

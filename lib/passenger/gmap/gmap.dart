@@ -6,15 +6,14 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:newheyauto/components/pass_support.dart';
+import 'package:newheyauto/passenger/pages/pass_support.dart';
 import 'package:newheyauto/passenger/pages/choose_driver.dart';
-import 'package:newheyauto/passenger/components/payments.dart';
 import 'package:newheyauto/passenger/pages/preBook_home.dart';
 import 'package:newheyauto/passenger/pages/pre_book.dart';
 import 'package:newheyauto/passenger/pages/ride_history.dart';
 import 'package:newheyauto/passenger/pages/settings.dart';
 import '../../choose_role.dart';
-import '../../components/pass_about.dart';
+import '../pages/pass_about.dart';
 import '../../constants/constants.dart';
 
 class GMap extends StatefulWidget {
