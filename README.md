@@ -22,3 +22,12 @@ their ride history. It includes features like push notifications for ride update
 
 ## Key Features
 
+- User registration and login
+- Interactive map for selecting pickup and destination locations
+- Real-time driver tracking and the estimated time of arrival
+- Booking history with ride details and status updates
+- Push notifications for ride updates and reminders
+- Integration with Google Maps API for accurate directions and distance calculations
+- Intuitive user interface with smooth navigation and responsive design
+
+
