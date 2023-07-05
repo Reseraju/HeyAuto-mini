@@ -30,7 +30,7 @@ their ride history. It includes features like push notifications for ride update
 - Integration with Google Maps API for accurate directions and distance calculations
 - Intuitive user interface with smooth navigation and responsive design
 
-## Technology Stack:
+## Technology Stack
 
 - Flutter: Cross-platform framework for building mobile applications
 - Firebase: Backend platform for authentication, real-time database, and cloud storage
