@@ -50,15 +50,6 @@ class _GMapState extends State<GMap> {
   // Map storing polylines created by connecting two points
   Map<PolylineId, Polyline> polylines = {};
 
-/*  //bottom navbar
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-*/
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -558,10 +549,8 @@ class _GMapState extends State<GMap> {
                   leading: const Icon(Icons.settings),
                   title: const Text('pre-Book Ride'),
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => PreBookHome()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => PreBookHome()));
                   },
                 ),
                 ListTile(
@@ -578,10 +567,8 @@ class _GMapState extends State<GMap> {
                   leading: const Icon(Icons.info),
                   title: const Text('About'),
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => AboutPage()));
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => AboutPage()));
                   },
                 ),
                 ListTile(
@@ -699,22 +686,14 @@ class _GMapState extends State<GMap> {
 
                     _calculateDistance().then((isCalculated) {
                       if (isCalculated) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Distance Calculated Sucessfully'),
-                          ),
-                        );
+                        print("distance calculated.");
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Error Calculating Distance'),
-                          ),
-                        );
+                        print("error calculating distance.");
                       }
                     });
 
                     // Add a delay of 2 seconds
-                    await Future.delayed(const Duration(seconds: 2));
+                    await Future.delayed(const Duration(seconds: 4));
                     Navigator.push(
                       context,
                       MaterialPageRoute(

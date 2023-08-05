@@ -13,6 +13,14 @@ class RideDetailsPage extends StatefulWidget {
 class _RideDetailsPageState extends State<RideDetailsPage> {
   double _rating = 0.0;
   String _review = '';
+  String _driverName = ''; // Add a variable to store the driver's name
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the driver's name from Firestore when the widget initializes
+    _fetchDriverName();
+  }
 
   void _submitRatingAndReview() async {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -31,6 +39,30 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
 
       // Show a success message or perform any other desired actions
 
+      // Show the "Thank you for your review" dialog box
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Thank you for your review!'),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+
+      // Reset the rating and review fields
+      setState(() {
+        _rating = 0.0;
+        _review = '';
+      });
+
     } catch (error) {
       // Handle any errors that occur during the submission
       print('Error submitting rating and review: $error');
@@ -38,13 +70,26 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
   }
 
 
+  void _fetchDriverName() async {
+    final driverId = widget.driverId['driverId'];
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    try {
+      final driverSnapshot = await _firestore.collection('Drivers').doc(driverId).get();
+      if (driverSnapshot.exists) {
+        setState(() {
+          _driverName = driverSnapshot.get('name');
+        });
+      }
+    } catch (error) {
+      print('Error fetching driver name: $error');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     var ride = widget.driverId;
-    var driverName = ride['driverName'];
-    var startLocation = ride['startLocation'];
-    var destination = ride['destinationLocation'];
-    //var estimatedFare = ride['estimatedFare'];
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -60,11 +105,17 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Driver Name: $driverName'),
-            Text('Start Location: $startLocation'),
-            Text('Destination: $destination'),
+            Padding(
+              padding: const EdgeInsets.only(top:20.0),
+              child: Center(
+                child: Text(
+                  'Driver Name: $_driverName',
+                  style: const TextStyle(fontSize: 23.0, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 71, 47, 17)),
+                ),
+              ),
+            ),
             //Text('Estimated Fare: $estimatedFare'),
-            const SizedBox(height: 24.0),
+            const SizedBox(height: 25.0),
             const Text(
               'Rate the Ride:',
               style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
@@ -87,15 +138,20 @@ class _RideDetailsPageState extends State<RideDetailsPage> {
                   _review = value;
                 });
               },
-              maxLines: 3,
+              maxLines: 5,
               decoration: const InputDecoration(
                 hintText: 'Enter your review',
               ),
             ),
             const SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: _submitRatingAndReview,
-              child: const Text('Submit'),
+            Center(
+              child: ElevatedButton(
+                onPressed: _submitRatingAndReview,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // Set your desired color here
+                ),
+                child: const Text('Submit'),
+              ),
             ),
           ],
         ),

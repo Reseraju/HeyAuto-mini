@@ -226,7 +226,7 @@ class _DriverDetailsState extends State<DriverDetails> {
             ),
             const SizedBox(height: 20,),
             // Add RatingBar widget
-            RatingBar(
+            /* RatingBar(
               initialRating: double.parse(_rating ?? '0'),
               direction: Axis.horizontal,
               allowHalfRating: false,
@@ -242,9 +242,10 @@ class _DriverDetailsState extends State<DriverDetails> {
                   _rating = rating.toString();
                 });
               },
-            ),
-      
-            StatefulBuilder(
+            ), */
+
+            // ENTER REVIEW
+            /*StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -276,7 +277,7 @@ class _DriverDetailsState extends State<DriverDetails> {
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.green.shade400),
               ),
               child: const Text('Submit'),
-            ),
+            ),*/
 
             // Inside the build method
             FutureBuilder<List<Map<String, dynamic>>>(
@@ -471,8 +472,6 @@ class _DriverDetailsState extends State<DriverDetails> {
       'startLocation': widget.start,
       'destinationLocation': widget.destination,
       'status': 'pending',
-      'rating': _rating,
-      'review': _review,
       'requestDate': currentDate,
     });
 

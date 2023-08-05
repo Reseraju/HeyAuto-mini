@@ -24,18 +24,19 @@ class _SettingsPageState extends State<SettingsPage> {
       // Update the auto deletion status in the Passengers collection
       FirebaseFirestore.instance
           .collection('Passengers')
-          .doc(passengerId) // Replace 'user_id' with the actual user ID
+          .doc(passengerId) // Use the passengerId variable
           .update({'autoDeleteEnabled': false})
           .then((_) {
-        // Update successful
-        print('Auto deletion status updated: disabled');
-      })
-      .catchError((error) {
-        // An error occurred while updating the status
-        print('Error updating auto deletion status: $error');
-      });
+            // Update successful
+            print('Auto deletion status updated: disabled');
+          })
+          .catchError((error) {
+            // An error occurred while updating the status
+            print('Error updating auto deletion status: $error');
+          });
     }
   }
+
 
   Future<void> _showDurationSelectionDialog() async {
     final selectedDuration = await showDialog<String>(

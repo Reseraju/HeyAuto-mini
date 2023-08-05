@@ -181,64 +181,72 @@ class _PreBookRidePageState extends State<PreBookRidePage> {
               ),
 
               const SizedBox(height: 32.0),
-              ElevatedButton(
-                onPressed: () {
-                  // Perform pre-booking action
-                  String pickupLocation = _pickupController.text;
-                  String destination = _destinationController.text;
-                  DateTime selectedDateTime = DateTime(
-                    _selectedDate.year,
-                    _selectedDate.month,
-                    _selectedDate.day,
-                    _selectedTime.hour,
-                    _selectedTime.minute,
-                  );
-
-                  // Perform any desired actions with the pre-booked ride details
-                  print('Pickup Location: $pickupLocation');
-                  print('Destination: $destination');
-                  print('Date and Time: $selectedDateTime');
-
-                  // Store pre-booked ride details to Firestore
-                  FirebaseFirestore.instance.collection('PreBookRide').add({
-                    'pickup_location': pickupLocation,
-                    'destination': destination,
-                    'date_time': selectedDateTime,
-                    'passenger_id': FirebaseAuth.instance.currentUser!.uid,
-                    'driver_id': selectedDriverId,
-                    'driver_name': driverName,
-                    'status': 'Pending',
-                  }).then((value) {
-                    // Pre-booked ride request successfully stored
-                    print('Pre-booked ride request stored in Firestore');
-
-                    // Show the request dialog
-                    _showRequestDialog();
-                  }).catchError((error) {
-                    // An error occurred while storing pre-booked ride request
-                    print('Error storing pre-booked ride request: $error');
-                    // Show an error dialog
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('Error'),
-                          content: const Text(
-                              'An error occurred while processing your pre-booked ride request. Please try again.'),
-                          actions: <Widget>[
-                            ElevatedButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Perform pre-booking action
+                    String pickupLocation = _pickupController.text;
+                    String destination = _destinationController.text;
+                    DateTime selectedDateTime = DateTime(
+                      _selectedDate.year,
+                      _selectedDate.month,
+                      _selectedDate.day,
+                      _selectedTime.hour,
+                      _selectedTime.minute,
                     );
-                  });
-                },
-                child: const Text('Pre-book Ride'),
+              
+                    // Perform any desired actions with the pre-booked ride details
+                    print('Pickup Location: $pickupLocation');
+                    print('Destination: $destination');
+                    print('Date and Time: $selectedDateTime');
+              
+                    // Store pre-booked ride details to Firestore
+                    FirebaseFirestore.instance.collection('PreBookRide').add({
+                      'pickup_location': pickupLocation,
+                      'destination': destination,
+                      'date_time': selectedDateTime,
+                      'passenger_id': FirebaseAuth.instance.currentUser!.uid,
+                      'driver_id': selectedDriverId,
+                      'driver_name': driverName,
+                      'status': 'Pending',
+                    }).then((value) {
+                      // Pre-booked ride request successfully stored
+                      print('Pre-booked ride request stored in Firestore');
+              
+                      // Show the request dialog
+                      _showRequestDialog();
+                    }).catchError((error) {
+                      // An error occurred while storing pre-booked ride request
+                      print('Error storing pre-booked ride request: $error');
+                      // Show an error dialog
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Error'),
+                            content: const Text(
+                                'An error occurred while processing your pre-booked ride request. Please try again.'),
+                            actions: <Widget>[
+                              ElevatedButton(
+                                child: const Text('OK'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green, 
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Text('Pre-book Ride'),
+                ),
               ),
             ],
           ),

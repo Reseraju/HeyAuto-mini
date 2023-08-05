@@ -99,6 +99,7 @@ class _RideHistoryPageState extends State<RideHistoryPage> {
           var destination = ride['destinationLocation'];
           var startLocation = ride['startLocation'];
           var driverId = ride['driverId'];
+
           // final duration = ride['duration'];
           // final dateOfTravel = ride['dateOfTravel'];
 
@@ -119,7 +120,8 @@ class _RideHistoryPageState extends State<RideHistoryPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RideDetailsPage(driverId : {'driverId': driverId}),
+                  builder: (context) =>
+                      RideDetailsPage(driverId: {'driverId': driverId}),
                 ),
               );
             },

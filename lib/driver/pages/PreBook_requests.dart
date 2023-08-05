@@ -31,8 +31,7 @@ class _PreBookRequestsState extends State<PreBookRequests> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Cancel Ride Request'),
-          content:
-              const Text('Are you sure you want to cancel this ride request?'),
+          content: const Text('Are you sure you want to cancel this ride request?'),
           actions: <Widget>[
             ElevatedButton(
               child: const Text('No'),
@@ -64,7 +63,7 @@ class _PreBookRequestsState extends State<PreBookRequests> {
     );
   }
 
-  void acceptRequest(String requestId,DateTime dateTime) {
+  void acceptRequest(String requestId, DateTime dateTime) {
     FirebaseFirestore.instance
         .collection('PreBookRide')
         .doc(requestId)
@@ -79,7 +78,7 @@ class _PreBookRequestsState extends State<PreBookRequests> {
     });
   }
 
-  void _showReminderDialog(String requestId,DateTime dateTime) {
+  void _showReminderDialog(String requestId, DateTime dateTime) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -98,7 +97,7 @@ class _PreBookRequestsState extends State<PreBookRequests> {
               child: const Text('Yes'),
               onPressed: () {
                 // Handle setting the reminder
-                setReminder( dateTime);
+                setReminder(dateTime);
                 Navigator.of(context).pop();
               },
             ),
@@ -154,25 +153,20 @@ class _PreBookRequestsState extends State<PreBookRequests> {
 
   void setReminder(DateTime dateTime) async {
     // Initialize the local notifications plugin
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     // Define the notification details
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'reminder_channel',
       'Reminder Channel',
-      //'Channel for reminder notifications',
       importance: Importance.high,
       priority: Priority.high,
     );
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
     // Initialize time zones
     tz.initializeTimeZones();
@@ -188,22 +182,32 @@ class _PreBookRequestsState extends State<PreBookRequests> {
       'Reminder for your appointment', // Notification body
       scheduledDate, // Scheduled date and time in the specified timezone
       platformChannelSpecifics,
-      //androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
+  }
+
+  Future<String?> getPassengerPhoneNumber(String passengerId) async {
+    try {
+      final passengerSnapshot = await FirebaseFirestore.instance.collection('Passengers').doc(passengerId).get();
+      if (passengerSnapshot.exists) {
+        final passengerData = passengerSnapshot.data() as Map<String, dynamic>;
+        return passengerData['phone_number'] as String?;
+      }
+    } catch (error) {
+      print('Error fetching passenger phone number: $error');
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       body: StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance.collection('PreBookRide').snapshots(),
+        stream: FirebaseFirestore.instance.collection('PreBookRide').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-                child: Text('Error retrieving pre-booked requests'));
+            return const Center(child: Text('Error retrieving pre-booked requests'));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -220,77 +224,115 @@ class _PreBookRequestsState extends State<PreBookRequests> {
             return const Center(child: Text('No pre-booked requests found'));
           }
 
-          return ListView(
-            children: preBookedRequests.map((doc) {
-              final requestId = doc.id;
-              final pickupLocation = doc['pickup_location'];
-              final destination = doc['destination'];
-              final dateTime = doc['date_time'].toDate();
-              final status = doc['status'];
-
-              Color statusColor;
-              if (status == 'Pending') {
-                statusColor = Colors.yellow;
-              } else if (status == 'Accepted') {
-                statusColor = Colors.green;
-              } else if (status == 'Cancelled') {
-                statusColor = Colors.red;
-              } else {
-                statusColor = Colors.black;
-              }
-
-              return Card(
-                child: ListTile(
-                  onLongPress: () {
-                    // Show the delete confirmation dialog
-                    showDeleteConfirmationDialog(requestId);
-                  },
-                  title: Text('Request ID: $requestId'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Pickup Location: $pickupLocation'),
-                      Text('Destination: $destination'),
-                      Text('Date and Time: $dateTime'),
-                      Text(
-                        'Status: $status',
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  trailing: status == 'Pending'
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                // Handle accept request
-                                acceptRequest(requestId, dateTime);
-                              },
-                              icon: const Icon(Icons.check),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                // Handle cancel request
-                                cancelRequest(requestId);
-                              },
-                              icon: const Icon(Icons.close),
-                            ),
-                          ],
-                        )
-                      : IconButton(
-                          onPressed: () {
-                            // Handle cancel request
-                            cancelRequest(requestId);
-                          },
-                          icon: const Icon(Icons.close),
-                        ),
+          return Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Text(
+                  'Your Pre-booked Ride Requests',
+                  style: TextStyle(fontSize: 26, color: Color.fromARGB(255, 27, 94, 32)),
                 ),
-              );
-            }).toList(),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: preBookedRequests.length,
+                  itemBuilder: (context, index) {
+                    final doc = preBookedRequests[index];
+                    final requestId = doc.id;
+                    final pickupLocation = doc['pickup_location'];
+                    final destination = doc['destination'];
+                    final dateTime = doc['date_time'].toDate();
+                    final status = doc['status'];
+                    final passengerId = doc['passenger_id']; // Replace 'passengerId' with the actual field name for passenger's ID
+
+                    return FutureBuilder<String?>(
+                      future: getPassengerPhoneNumber(passengerId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Card(
+                            child: ListTile(
+                              title: Text('Loading...'),
+                            ),
+                          );
+                        }
+
+                        final passengerPhoneNumber = snapshot.data ?? 'Unknown';
+
+                        Color statusColor;
+                        if (status == 'Pending') {
+                          statusColor = Colors.yellow;
+                        } else if (status == 'Accepted') {
+                          statusColor = Colors.green;
+                        } else if (status == 'Cancelled') {
+                          statusColor = Colors.red;
+                        } else {
+                          statusColor = Colors.black;
+                        }
+
+                        return Card(
+                          child: ListTile(
+                            onLongPress: () {
+                              // Show the delete confirmation dialog
+                              showDeleteConfirmationDialog(requestId);
+                            },
+                            title: Text('Passenger Phone: $passengerPhoneNumber'),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Pickup Location: $pickupLocation'),
+                                Text('Destination: $destination'),
+                                Text('Date and Time: $dateTime'),
+                                Text(
+                                  'Status: $status',
+                                  style: TextStyle(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: status == 'Pending'
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          // Handle accept request
+                                          acceptRequest(requestId, dateTime);
+                                        },
+                                        icon: const Icon(Icons.check),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          // Handle cancel request
+                                          cancelRequest(requestId);
+                                        },
+                                        icon: const Icon(Icons.close),
+                                      ),
+                                    ],
+                                  )
+                                : IconButton(
+                                    onPressed: () {
+                                      // Handle cancel request
+                                      cancelRequest(requestId);
+                                    },
+                                    icon: const Icon(Icons.close),
+                                  ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Long press a list item to delete',
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
           );
         },
       ),

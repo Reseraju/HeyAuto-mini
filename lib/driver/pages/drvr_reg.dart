@@ -5,6 +5,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:newheyauto/driver/pages/drvr_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'dart:io'; // For File class
+
+
 class DrvrRegistration extends StatefulWidget {
   const DrvrRegistration({
     Key? key,
@@ -36,7 +40,35 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
     super.initState();
   }
 
-  Future<void> updateUserProfile(String name, List<String> uploadedFiles, String vehicleNo, String autoLocation) async {
+  // Upload Pollution Certificate to Firebase Storage
+  Future<String?> uploadPollutionCertificate(File file) async {
+    try {
+      final fileName = 'pollution_certificate_${DateTime.now().millisecondsSinceEpoch}.pdf'; // You can change the file name if needed
+      final reference = firebase_storage.FirebaseStorage.instance.ref().child('pollution_certificates/$fileName');
+      await reference.putFile(file);
+      final downloadUrl = await reference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading pollution certificate: $e');
+      return null;
+    }
+  }
+
+  // Upload Driving License to Firebase Storage
+  Future<String?> uploadDrivingLicense(File file) async {
+    try {
+      final fileName = 'driving_license_${DateTime.now().millisecondsSinceEpoch}.pdf'; // You can change the file name if needed
+      final reference = firebase_storage.FirebaseStorage.instance.ref().child('driving_licenses/$fileName');
+      await reference.putFile(file);
+      final downloadUrl = await reference.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading driving license: $e');
+      return null;
+    }
+  }
+
+  Future<void> updateUserProfile(String name, File pollutionCertificate, File drivingLicense, String vehicleNo, String autoLocation) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       final user = FirebaseAuth.instance.currentUser;
@@ -53,13 +85,25 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
         // Save field values in shared preferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('name', name);
-        await prefs.setStringList('uploadedFiles', uploadedFiles);
+
+        // Upload Pollution Certificate and get its download URL
+        String? pollutionCertificateUrl;
+        if (pollutionCertificate != null) {
+          pollutionCertificateUrl = await uploadPollutionCertificate(pollutionCertificate);
+        }
+
+        // Upload Driving License and get its download URL
+        String? drivingLicenseUrl;
+        if (drivingLicense != null) {
+          drivingLicenseUrl = await uploadDrivingLicense(drivingLicense);
+        }
 
         await userDoc.update({
           'name': name,
-          'uploaded_files': uploadedFiles,
           'auto_location': autoLocation,
           'vehicle_no': vehicleNo,
+          'pollution_certificate_url': pollutionCertificateUrl,
+          'driving_license_url': drivingLicenseUrl,
         });
 
         print('User profile updated successfully.');
@@ -70,6 +114,7 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
       print('Error updating user profile: $e');
     }
   }
+
 
   List<Step> stepList() => [
         Step(
@@ -128,12 +173,10 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles();
+                    FilePickerResult? result = await FilePicker.platform.pickFiles();
                     if (result != null) {
                       setState(() {
-                        _pollutionCertificatePath =
-                            result.files.single.path ?? 'No file selected';
+                        _pollutionCertificatePath = result.files.single.path ?? 'No file selected';
                       });
                     }
                   },
@@ -153,12 +196,10 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () async {
-                    FilePickerResult? result =
-                        await FilePicker.platform.pickFiles();
+                    FilePickerResult? result = await FilePicker.platform.pickFiles();
                     if (result != null) {
                       setState(() {
-                        _drivingLicensePath =
-                            result.files.single.path ?? 'No file selected';
+                        _drivingLicensePath = result.files.single.path ?? 'No file selected';
                       });
                     }
                   },
@@ -238,7 +279,9 @@ class _DrvrRegistrationState extends State<DrvrRegistration> {
       floatingActionButton: _activeStepIndex == stepList().length - 1
           ? FloatingActionButton.extended(
               onPressed: () {
-                updateUserProfile(name.text, [_pollutionCertificatePath?? '',_drivingLicensePath ?? ''],vehicleNo.text, autoLocation.text);
+                final pollutionCertificateFile = _pollutionCertificatePath != null ? File(_pollutionCertificatePath!) : null;
+                final drivingLicenseFile = _drivingLicensePath != null ? File(_drivingLicensePath!) : null;
+                updateUserProfile(name.text, pollutionCertificateFile!, drivingLicenseFile!, vehicleNo.text, autoLocation.text);
               },
               label: const Text('Submit'),
               icon: const Icon(Icons.check),

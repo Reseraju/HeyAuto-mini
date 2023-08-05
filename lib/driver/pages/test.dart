@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -212,38 +211,17 @@ class _DriverHomePageState extends State<DriverHomePage> {
 
   
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Display the welcome message here
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: Text(
-                  'Welcome👋',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade900,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20,),
-            const Divider(
-              thickness: 2, // Customize the thickness of the divider
-              color: Colors.grey, // Customize the color of the divider
-              indent: 16, // Customize the indent (left padding) of the divider
-              endIndent: 16, // Customize the end indent (right padding) of the divider
-            ),
-            // Display the "Driver Availability" row here
             Padding(
-              padding: const EdgeInsets.only(left:10.0),
+              padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
@@ -258,18 +236,11 @@ class _DriverHomePageState extends State<DriverHomePage> {
                       _updateDriverAvailability(value);
                     },
                   ),
-                ],               
+                ],
               ),
             ),
-            const Padding(
-              padding:  EdgeInsets.only(left:10.0),
-              child:  Text('Mark your availability here',style: TextStyle(fontSize: 15) ),
-            ),
-            const Divider(
-              thickness: 2, // Customize the thickness of the divider
-              color: Colors.grey, // Customize the color of the divider
-              indent: 16, // Customize the indent (left padding) of the divider
-              endIndent: 16, // Customize the end indent (right padding) of the divider
+            const SizedBox(
+              height: 40,
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -359,6 +330,7 @@ class _DriverHomePageState extends State<DriverHomePage> {
           ],
         ),
       ),
+      
     );
   }
 
